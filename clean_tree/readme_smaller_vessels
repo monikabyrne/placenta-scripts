@@ -1,0 +1,210 @@
+1. RemoveDuplicateElements.py
+input: skeleton graphs from matlab skeleton_sv.exelem skeleton_sv.exnode
+output: sv_nodes_v1.exnode, sv_elems_v1.exelem
+
+check if duplicate elements are to do with my changes to matlab plugin (run for previous version of tree graph)
+
+2. RemoveDisconnectedBranches.py
+input: sv_nodes_v1.exnode, sv_elems_v1.exelem
+length_threshold = 100
+output: sv_nodes_100_v2.exnode, sv_elems_100_v2.exelem
+
+can’t use the small vessels – can’t find a good chorionic tree;
+stem villi belonging to a single chorionic tree are either very broken up or very sparse
+
+
+cmgui: all_vessels.com
+
+3. RescaleGraphsOnly.py
+input: sv_nodes_100_v2.exnode, sv_elems_100_v2.exelem
+output: sv_nodes_v3.exnode sv_elems_v3.exelem
+
+resize the small vessels and use this to add stems to the chorionic tree
+
+4. AddNodes.py
+input: sv_nodes_v3.exnode; large vessels: new_elems_v10.exelem new_nodes_v10.exnode
+output: chorionic_vessels/sv_nodes_combined_v3 sv_elems_combined_v3
+
+5. Manually added stems pointing towards groups of small vessel nodes in CMGUI
+input: chorionic_vessels/sv_nodes_combined_v4 sv_elems_combined_v4
+output: chorionic_vessels/sv_nodes_manually_edited_v4 sv_manually_edited_combined_v4
+
+
+6. manually remove groups of scale factor lines - they're not in placentagen outputs; only in ex files saved in cmgui
+saved as: chor_elems_v1 and chor_nodes_v1 (chorionic vessels with stems)
+
+no duplicate elements found - ran RemoveDuplicateElements.py
+
+
+7. remove orphan nodes
+RemoveDisconnectedBranches.py
+inputs: chorionic_vessels/chor_elems_v1 chor_nodes_v1
+outputs: chorionic_vessels/chor_elems_v2 chor_nodes_v2
+
+RenumberNodes.py - renumber nodes after manual corrections (don't need to, node numbers are already ok)
+
+RemoveRecursiveElements.py - these are elements with 0 length connected to the same node (an artefact of manual edits)
+no recursive elements found
+
+FixElementDirection.py - no change; direction already ok
+
+
+
+8. RenumberElements2 - just the exnode and exelem files
+do this for debugging placentagen
+inputs: chorionic_vessels/chor_elems_v2 chor_nodes_v2
+outputs: chorionic_vessels/chor_elems_v3 chor_nodes_v3
+
+this didn't make a difference in placentagen
+
+
+9. Transform the chorionic tree so it point (0,0,0) is in the centre of the placenta in CMGUI
+chor_nodes_v4
+
+
+14
+WriteRadiusAsIPFIEL.py
+input: new_elems_v8.exelem new_nodes_v8.exnode elem_radius_large_vessels_v8.csv
+output: elem_radius_large_vessels_v9.ipfiel
+
+
+
+16. renumber elements
+RenumberElements.py
+inputs: new_elems_v9.exelem new_nodes_v9.exnode elem_radius_large_vessels_v8.csv
+outputs: new_elems_v10.exelem new_nodes_v10.exnode
+new_elems_v10.ipelem new_nodes_v10.ipnode
+elem_radius_v10.ipfiel (real values have 10 decimal points in this version)
+
+cmgui: tree_version_10.com
+
+
+
+GetVesselRadius.py - run this for small vessels
+input: sv_nodes_v3.exnode sv_elems_v3.exelem
+large_vessels.exdata - small vessels, rescale
+get points within 35 units from the centre of an element, try within 20 units instead?
+output: elem_radius.csv
+
+
+
+improve stems
+    6. AddNodes.py
+    inputs: chor_elems_v1 chor_nodes_v1 sv_nodes_v3.exnode (small vessel nodes)
+    output: combined_nodes_v1
+
+    manual edits in CMGUI
+    chor_elems_manually_edited_v1
+    chor_nodes_manually_edited_v1
+    sed '71251,89113d' chor_nodes_manually_edited_v1.exnode  > chor_nodes_cycle2_v1.exnode
+
+    more edits in CMGUI
+    chor_elems_cycle2_v2_manually_edited
+    chor_nodes_cycle2_v2_manually_edited
+    sed '71256,89075d' chor_nodes_cycle2_v2_manually_edited.exnode  > chor_nodes_cycle2_v2.exnode
+    sed '7267,8671d' chor_elems_cycle2_v2_manually_edited.exelem  > chor_elems_cycle2_v2.exelem
+
+    chor_nodes_cycle2_v2
+    chor_elems_cycle2_v2
+
+
+    new elements 1374 onwards
+    calculate the radius of stems and smaller vessels in reprosim
+
+    7. remove orphan nodes
+    RemoveDisconnectedBranches.py
+    inputs: chor_nodes_cycle2_v2 chor_elems_cycle2_v2
+    output: chor_nodes_cycle2_v3 chor_elems_cycle2_v3
+
+    RemoveRecursiveElements.py - these are elements with 0 length connected to the same node (an artefact of manual edits)
+    2 elements removed
+    inputs: chor_nodes_cycle2_v3 chor_elems_cycle2_v3
+    output: chor_nodes_cycle2_v4 chor_elems_cycle2_v4
+
+    FixElementDirection.py
+('swapping nodes for element', 1307)
+('swapping nodes for element', 1306)
+('swapping nodes for element', 1305)
+('swapping nodes for element', 1304)
+('swapping nodes for element', 1303)
+('swapping nodes for element', 1302)
+    inputs: chor_nodes_cycle2_v4 chor_elems_cycle2_v4
+    output: chor_nodes_cycle2_v5 chor_elems_cycle2_v5
+
+
+    8. RenumberElements2 - just the exnode and exelem files
+    do this for debugging placentagen
+    inputs: chorionic_vessels/chor_elems_cycle2_v5 chor_nodes_cycle2_v5
+    outputs: chorionic_vessels/chor_elems_cycle2_v6 chor_nodes_cycle2_v6
+
+
+    9. Transformed the chorionic tree so point (0,0,0) is in the centre.
+    Manually updated
+    Node: 1385
+    8.866692057486299e+00
+    2.993813910777890e+01
+    4.510812135622725e+00
+    as some vessels were grown in the wrong direction from this node
+
+    10. Recalculated the radius
+    GetVesselRadius.py
+    looking at points within 4 units of the element centre (as graphs have been rescaled)
+    inputs: chorionic_vessels/chor_elems_cycle2_v6.exelem chorionic_vessels/chor_nodes_cycle2_v6.exelem
+    chorionic_vessels/large_vessel_surface_v2.exdata
+    output: chorionic_vessels/large_vessel_radius_cycle2_v1.csv
+
+    11. Override radius for manually added vessels
+
+    GetVesselRadius.py for small vessels to get the caliber of the stems - 0.7mm
+    inputs: small_vessels/sv_elems_v3.exelem csmall_vessels/sv_nodes_v3.exelem
+    small_vessels/small_vessel_surface_rescaled.exdata
+    output: small_vessels/small_vessel_radius_cycle2_v1.csv
+
+
+
+    FixRadius.py
+    listed manually added elements
+elem_list.extend([42,95,127,128,129,130,131,232,233,234,235,236,237,238,274,318,319,320,321,431,432,433]) #cycle 2 version 1
+elem_list.extend([433,434,435,436,430,391,388,389,380,644,555,556,557,531,541,542,543,544,545,1429,1428])
+elem_list.extend([1353,1354,1355,1386,1417,1418,1419,1420,1421,1422,1423,1424,1425,1426,1427,999,1001,1002,1003])
+elem_list.extend([1004,1005,779,822,823,824,825,837,838,839,840,841,830,831,832,833,834,835,900,901,1016])
+elem_list.extend([1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1097,1098,1099,1100,1101,1102,1103])
+elem_list.extend([1091,1092,1193,1291,1292,1293,1294,1295,1296,1297,1298,1299,1300,1280,1281,1268,1269,1270])
+
+umbilical_artery_elems
+
+villous_tree_stems = [208,138,239,440,441,442,439,322,438,437,1430,645,546,631,1415,1015,842,1180] #set these to 0.7 mm
+
+    outputs: chorionic_vessels/element_radius_cycle2_v2.csv
+             chorionic_vessels/node_radius__cycle2_v2.csv
+             chorionic_vessels/chorionic_vessel_radii_cycle2_v2.ipfiel
+
+
+Roz's paper -Whole placental imaging allowed visualisation of vessels down  to 300micron,representing the stem villi arterioles
+
+
+switch to using imports in placentagen
+
+to remove scale factor
+
+#read the element file
+element_file = pd.read_csv('chorionic_vessels/chor_elems_v2.exelem',sep="\n", header=None)
+#remove lines = 'Scale factors:' or '  1.000000000000000e+00  1.000000000000000e+00'
+#element_file = element_file[(element_file[0] != ' Scale factors:')]
+#element_file = element_file[(element_file[0] != '  1.000000000000000e+00  1.000000000000000e+00')]
+#update indices
+#element_file.index = range(0,len(element_file))
+#element_file.to_csv('chorionic_vessels/element_file.csv')
+
+#num_elems = (len(element_file)-31)/3
+#elems = np.zeros((num_elems, 3), dtype=int)
+
+#i=0
+#for n in range(33, len(element_file),3):
+#    elems[i][0] = i  # creating new element
+#    nodes = element_file[0][n].split()
+#    elems[i][1] = old_to_new_node[int(nodes[0])]  # starts at this node
+#    elems[i][2] = old_to_new_node[int(nodes[1])]  # ends at this node
+#    i = i+1
+
+

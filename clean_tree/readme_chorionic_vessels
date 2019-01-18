@@ -1,0 +1,197 @@
+1. RemoveDuplicateElements.py
+input: skeleton graphs from matlab skeleton_mb.exelem skeleton_mb.exnode
+output: skeleton_mb_2.exnode, skeleton_mb_2.exelem
+
+check if duplicate elements are to do with my changes to matlab plugin (run for previous version of tree graph)
+
+2. RemoveDisconnectedBranches.py
+input: skeleton_mb_2.exnode, skeleton_mb_2.exelem
+length_threshold = 500
+output: new_nodes_500.exnode new_elems_500.exelem
+
+
+2.1 GetVesselRadius.py
+input: new_nodes_500.exnode new_elems_500.exelem large_vessels.exdata
+get points within 35 units from the centre of an element
+output: elem_radius.csv
+
+3. RemoveShortTerminalBranches.py
+Remove short Elements with a small radius
+
+input: new_nodes_500.exnode new_elems_500.exelem elem_radius.csv
+  length_threshold = 30 radius_threshold = 5
+output: new_nodes_sb_30_5.exnode new_elems_sb_30_5.exelem elem_radius_sb_30_5.csv
+
+4. RemoveThinBranches.py (this should remove most of the loops)
+input: new_nodes_sb_30_5.exnode new_elems_sb_30_5.exelem elem_radius_sb_30_5.csv
+ radius_threshold = 5
+output: new_nodes_tb_5.exnode new_elems_tb_5.exelem elem_radius_tb_5.csv
+
+cmgui: thin_branches_removed.com
+
+5. RemoveShortTerminalBranches.py (need to run this again after loops were removed)
+Remove short branches no matter what radius
+input: new_nodes_tb_5.exnode new_elems_tb_5.exelem elem_radius_tb_5.csv
+    length_threshold = 30 radius_threshold = 30
+output: new_nodes_sb_30_30_v2.exnode new_elems_sb_30_30_v2.exelem elem_radius_sb_30_30_v2.csv
+
+6. run 5 again
+
+input: new_nodes_sb_30_30_v2.exnode new_elems_sb_30_30_v2.exelem elem_radius_sb_30_30_v2.csv
+    length_threshold = 30 radius_threshold = 30
+output: new_nodes_sb_30_30_v3.exnode new_elems_sb_30_30_v3.exelem elem_radius_sb_30_30_v3.csv
+
+
+
+
+7. manual edits in cmgui:
+a) remove elements
+b) manually add new nodes and elements (including the cord insertion - check with Alys where it should go)
+
+output: nodes_corrected.exnode elems_corrected.exelem
+manual edits reuse element numbers so I'll have to run the radius script again
+
+
+7.1 RenumberNodes.py
+inputs: nodes_corrected.exnode elems_corrected.exelem
+(had to manually remove groups of scale factor lines - they're not in placentagen outputs; only in ex files saved in cmgui)
+outputs: nodes_corrected_v2.exnode elems_corrected_v2.exelem
+
+8. remove short disconnected branches again and orphan nodes
+RemoveDisconnectedBranches.py
+inputs: nodes_corrected_v2.exnode elems_corrected_v2.exelem
+length_threshold = 50
+outputs: new_nodes_50_v2.exnode new_elems_50_v2.exelem
+
+had to run it again to remove node 147 which had an element connected to it and no other nodes
+outputs: new_nodes_50_v3.exnode new_elems_50_v3.exelem
+
+
+8.1 RemoveRecursiveElements.py
+these are elements with 0 length connected to the same node (an artefact of manual edits)
+inputs: new_nodes_50_v3.exnode new_elems_50_v3.exelem
+outputs: new_nodes_v1.exnode new_elems_v1.exelem
+
+
+9. manually edit the tree again - two arteries in umbilical cord (check Alys's generated tree)
+inputs: new_nodes_v1.exnode new_elems_v1.exelem
+outputs: nodes_manually_edited_v3.exnode elems_manually_edited_v3.exnode (manually removed extra lines that cmgui added)
+stored outputs as new_nodes_v2.exnode new_elems_v2.exelem
+
+ran RemoveDuplicateElements again
+output: new_nodes_v3.exnode new_elems_v3.exelem
+RemoveRecursiveElements - no recursive elements found
+RemoveDisconnectedBranches
+length threshold: 50
+input: new_nodes_v3.exnode new_elems_v3.exelem
+output: new_nodes_v4.exnode new_elems_v4.exelem
+
+10.recalculate radius for all elements
+GetVesselRadius.py
+input: new_nodes_v4.exnode new_elems_v4.exelem large_vessels.exdata
+get points within 35 units from the centre of an element
+output: element_radius_v13.csv
+
+cmgui: step_11_cmgui.com
+
+
+11. fix element direction
+FixElementDirection.py
+input: new_nodes_v4.exnode new_elems_v4.exelem
+output: new_nodes_v5.exnode new_elems_v5.exelem
+
+cmgui: fix_direction_cmgui.com
+
+
+12. correct radius - list elements added manually
+    make a note of the elements that won't have a radius based on vessel surface mesh
+    calculate element radius for these elements-
+
+
+elements added manually (index numbers):
+1361,1359,1360,1358,1250,63,82,143,142,112,204,180,90,72,347,210,211,214,205,1353
+
+filtered element_radius_v13.csv for elements with radius <= 5 units
+stored as elements_small_radius.csv
+
+WriteSubsetOfElements.py to output the small radius elements as exelem file to visualise in cmgui elems_with_short_radius_v1.exelem
+
+FixRadius.py udpate radius for manually added elements or those with a very small radius (<5 units)
+output: element_radius_large_vessels_v1.csv elem_radius_large_vessels_v1.ipfiel
+
+
+check how much the radius changes between connected elements
+element_radii_at_node_large_vessels_v2.csv
+added elements with biggest jumps in radius to the list of elements to fix radius for in FixRadius.py
+
+element_radii_at_node_large_vessels_v3.csv
+elements which have the biggest changes in the radius are at branching points where the new vessel is much narrower - this is ok
+Ask Alys how elements at branching points are treated, if the new element is within the radius of the mother branch
+
+output: element_radius_large_vessels_v3.csv elem_radius_large_vessels_v3.ipfiel
+
+
+13. move 2 arteries in umbilical cord
+saved manual edits as: elems_manually_edited_v3.exelem nodes_manually_edited_v3.exnode
+
+new_elems_v6.exelem new_nodes_v6.exnode
+element 1358 (index) was removed, manually deleted radius for element 1358 and updated subsequent element numbers in element_radius_v13.csv
+removed element 729 and 1361 from elements_small_radius.csv
+inlet_element = 1360
+rescaled radius so that 1 unit = 1mm
+ran FixRadius.py again
+output: element_radius_large_vessels_v4.csv elem_radius_large_vessels_v4.ipfiel
+cmgui:fix_direction_cmgui
+
+cord insertion site in Figure 1 of this paper http://dx.doi.org/10.1016/j.placenta.2017.07.340
+
+fix element direction again
+FixElementDirection.py
+input: new_nodes_v6.exnode new_elems_v6.exelem
+output: new_nodes_v7.exnode new_elems_v7.exelem
+
+14
+    errors when running reprosim with new_elems_v8 and new_nodes_v8
+    1 node had 4 elements connected:
+
+node          71
+ total number of elements connected           4
+ element         152
+ element         202
+ element         203
+ element         862
+
+removed element 152 and it's 2nd node as this was a short branch
+RemoveElems.py
+element 151 and node 716 (indices)
+
+input: new_elems_v7.exelem new_nodes_v7.exnode element_radius_large_vessels_v4.csv
+output: new_elems_v8.exelem new_nodes_v8.exnode elem_radius_large_vessels_v8.csv (rescaled radius)
+
+WriteRadiusAsIPFIEL.py
+input: new_elems_v8.exelem new_nodes_v8.exnode elem_radius_large_vessels_v8.csv
+output: elem_radius_large_vessels_v9.ipfiel
+
+15. rescale images so that 1 unit = 1mm (current scale 1 unit = 0.1165 mm) and save as ipelem, ipnode files
+RescaleGraphs.py
+inputs: new_elems_v8.exelem new_nodes_v8.exnode large_vessels.exdata
+outputs: new_elems_v9.exelem new_nodes_v9.exnode large_vessel_surface_v2.exdata
+        ip files: new_elems_v9.ipelem new_nodes_v9.ipnode
+
+cmgui: tree_version_9.com
+
+
+16. renumber elements
+RenumberElements.py
+inputs: new_elems_v9.exelem new_nodes_v9.exnode elem_radius_large_vessels_v8.csv
+outputs: new_elems_v10.exelem new_nodes_v10.exnode
+new_elems_v10.ipelem new_nodes_v10.ipnode
+elem_radius_v10.ipfiel (real values have 10 decimal points in this version)
+
+cmgui: tree_version_10.com
+
+
+
+ConvertEXtoIP.py
+manually created exnode and exelem files for testing add_matching_mesh subroutine
+converted these files to ipelem and ipnode
