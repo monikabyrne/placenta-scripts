@@ -14,6 +14,16 @@ def get_point_to_plane_dist(point_coords,A,B,C,D):
 
     return distance
 
+#parameters
+#look for vessel surface points within what maximum radius from element centre?
+#radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
+surface_points_max_radius = 2
+
+#what is the maximum distance the radius points are allowed to fall from the plane passing through the centre
+#of the element and perpendicular to the element
+#1 before rescaling
+max_distance_from_plane = 0.1165
+
 
 #read the node file
 #node_file = pd.read_csv('new_nodes_500.exnode',sep="\n", header=None) #1st run
@@ -137,7 +147,7 @@ for i in range(0,num_elems):
     # get points in the blood vessel surface within a set radius from the centre of an element
 
     #radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
-    surface_points = point_tree.data[point_tree.query_ball_point(centre, 2)]
+    surface_points = point_tree.data[point_tree.query_ball_point(centre, surface_points_max_radius)]
 
     if len(surface_points) > 0:
 
@@ -173,8 +183,8 @@ for i in range(0,num_elems):
         #    print ('node1', [x1, y1, z1])
         #    print ('node2', [x2, y2, z2])
 
-        # get points within 1 unit of the plane and more than 0 distance from centre
-        radius_points = points_distance[(points_distance['distance_to_plane'] <= 1)
+        # get points within max distance from the plane and more than 0 distance from centre
+        radius_points = points_distance[(points_distance['distance_to_plane'] <= max_distance_from_plane)
                                         & (points_distance['distance_to_centre'] > 0)].copy()
         num_points = len(radius_points)
 
@@ -280,7 +290,7 @@ for i in range(0,num_elems):
                             0,0,0,0]
 
 #print to csv
-elems_info_df.to_csv('small_vessels/small_vessel_radius_cycle2_v1.csv')
+elems_info_df.to_csv('small_vessels/small_vessel_radius_cycle2_v2.csv')
 
 
 
