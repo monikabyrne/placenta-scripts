@@ -149,21 +149,27 @@ improve stems
     10. Recalculated the radius
     GetVesselRadius.py
     looking at points within 4 units of the element centre (as graphs have been rescaled)
+    radius points must be within 0.1165 unit of the plane
     inputs: chorionic_vessels/chor_elems_cycle2_v6.exelem chorionic_vessels/chor_nodes_cycle2_v6.exelem
     chorionic_vessels/large_vessel_surface_v2.exdata
-    output: chorionic_vessels/large_vessel_radius_cycle2_v1.csv
+    output: chorionic_vessels/large_vessel_radius_cycle2_v1.csv (forgot to rescale distance from the plane)
+            chorionic_vessels/large_vessel_radius_cycle2_v2.csv
 
     11. Override radius for manually added vessels
 
     GetVesselRadius.py for small vessels to get the caliber of the stems - 0.7mm
-    inputs: small_vessels/sv_elems_v3.exelem csmall_vessels/sv_nodes_v3.exelem
+    inputs: small_vessels/sv_elems_v3.exelem small_vessels/sv_nodes_v3.exelem
     small_vessels/small_vessel_surface_rescaled.exdata
-    output: small_vessels/small_vessel_radius_cycle2_v1.csv
+    output: small_vessels/small_vessel_radius_cycle2_v1.csv (forgot to rescale distance from the plane)
+            small_vessels/small_vessel_radius_cycle2_v2.csv
 
 
 
     FixRadius.py
-    listed manually added elements
+
+    added elements with small radii (under 0.6mm)
+    manually added elements
+
 elem_list.extend([42,95,127,128,129,130,131,232,233,234,235,236,237,238,274,318,319,320,321,431,432,433]) #cycle 2 version 1
 elem_list.extend([433,434,435,436,430,391,388,389,380,644,555,556,557,531,541,542,543,544,545,1429,1428])
 elem_list.extend([1353,1354,1355,1386,1417,1418,1419,1420,1421,1422,1423,1424,1425,1426,1427,999,1001,1002,1003])
@@ -171,13 +177,155 @@ elem_list.extend([1004,1005,779,822,823,824,825,837,838,839,840,841,830,831,832,
 elem_list.extend([1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1097,1098,1099,1100,1101,1102,1103])
 elem_list.extend([1091,1092,1193,1291,1292,1293,1294,1295,1296,1297,1298,1299,1300,1280,1281,1268,1269,1270])
 
-umbilical_artery_elems
+umbilical_artery_elems = [0,1,2,209,210] 3mm radius (change to 2mm?)
 
 villous_tree_stems = [208,138,239,440,441,442,439,322,438,437,1430,645,546,631,1415,1015,842,1180] #set these to 0.7 mm
 
-    outputs: chorionic_vessels/element_radius_cycle2_v2.csv
-             chorionic_vessels/node_radius__cycle2_v2.csv
-             chorionic_vessels/chorionic_vessel_radii_cycle2_v2.ipfiel
+    outputs: chorionic_vessels/element_radius_cycle2_v3.csv
+             chorionic_vessels/node_radius__cycle2_v3.csv
+             chorionic_vessels/chorionic_vessel_radii_cycle2_v3.ipfiel
+
+
+
+cycle 3 - had to change where umbilical arteries insert
+
+started with cycle 2 improved stems
+chorionic_vessels/chor_nodes_cycle2_v6
+chorionic_vessels/chor_elems_cycle2_v6
+
+saved manual edits as:
+chorionic_vessels/chor_elems_cycle3_v1
+chorionic_vessels/chor_nodes_cycle3_v1
+
+manually updated element numbers and radii and saved as
+chorionic_vessels/element_radius_cycle3_v1_updated_radii
+
+
+SimpleRenumberElements.py
+inputs: chor_nodes_cycle3_v1 chor_elems_cycle3_v1
+       chorionic_vessels/element_radius_cycle3_v1_updated_radii.csv
+outputs: chor_nodes_cycle3_v2 chor_elems_cycle3_v2
+     chorionic_vessels/chorionic_element_radii_cycle3_v1.csv
+
+RenumberNodes.py
+inputs: chor_nodes_cycle3_v2 chor_elems_cycle3_v2
+outputs: chor_nodes_cycle3_v3 chor_elems_cycle3_v3
+
+
+    remove orphan nodes
+    RemoveDisconnectedBranches.py
+    none
+
+    RemoveRecursiveElements.py - these are elements with 0 length connected to the same node (an artefact of manual edits)
+    none
+
+    FixElementDirection.py
+('swapping nodes for element', 210)
+('swapping nodes for element', 678)
+('swapping nodes for element', 677)
+('swapping nodes for element', 676)
+('swapping nodes for element', 675)
+('swapping nodes for element', 674)
+('swapping nodes for element', 673)
+('swapping nodes for element', 672)
+('swapping nodes for element', 671)
+('swapping nodes for element', 670)
+('swapping nodes for element', 669)
+('swapping nodes for element', 668)
+('swapping nodes for element', 667)
+('swapping nodes for element', 666)
+('swapping nodes for element', 665)
+('swapping nodes for element', 664)
+('swapping nodes for element', 663)
+('swapping nodes for element', 662)
+('swapping nodes for element', 661)
+('swapping nodes for element', 660)
+('swapping nodes for element', 659)
+('swapping nodes for element', 658)
+('swapping nodes for element', 657)
+('swapping nodes for element', 656)
+('swapping nodes for element', 655)
+('swapping nodes for element', 654)
+('swapping nodes for element', 653)
+('swapping nodes for element', 652)
+('swapping nodes for element', 651)
+('swapping nodes for element', 650)
+('swapping nodes for element', 649)
+('swapping nodes for element', 648)
+('swapping nodes for element', 647)
+('swapping nodes for element', 646)
+('swapping nodes for element', 454)
+('swapping nodes for element', 453)
+('swapping nodes for element', 452)
+('swapping nodes for element', 451)
+('swapping nodes for element', 450)
+('swapping nodes for element', 449)
+('swapping nodes for element', 448)
+('swapping nodes for element', 447)
+('swapping nodes for element', 446)
+('swapping nodes for element', 445)
+('swapping nodes for element', 444)
+('swapping nodes for element', 443)
+
+    inputs: chor_nodes_cycle3_v3 chor_elems_cycle3_v3
+    output: chor_nodes_cycle3_v4 chor_elems_cycle3_v4
+
+   RemoveDuplicateElements.py
+   none
+
+RenumberElements.py
+
+   input: chor_nodes_cycle3_v4 chor_elems_cycle3_v4
+           chorionic_vessels/chorionic_element_radii_cycle3_v1.csv
+   output: chor_nodes_cycle3_v5 chor_elems_cycle3_v5
+           full_tree/chorionic_element_radii_cycle3_v5.csv
+           full_tree/chorionic_node_radii_cycle3_v5.csv
+           full_tree/chorionic_element_radii_cycle3_v5.ipfiel
+
+manually transformed the nodes in CMGUI to where placentagen expects the centre of the placenta:
+  input: example-data-files/chor_nodes_cycle3_v5 example-data-files/chor_elems_cycle3_v5
+  output: example-data-files/chor_nodes_cycle3_v6
+
+
+manually updated node 1381 as vessels were grown upwards from this node
+from
+  9.286500000000004e+00
+  2.875331221393841e+01
+  7.303800993554111e+00
+to
+    8.866692057486299e+00
+    2.993813910777890e+01
+    4.510812135622725e+00
+
+
+
+manually updated node 1357 (inlet) to extend the inlet element:
+chor_nodes_cycle3_v5
+Node: 1357
+          86.83009911837820
+          100.7972683276839
+          -4.414253409770605
+
+chor_nodes_cycle3_v6 (transformed version)
+Node 1357
+
+
+
+added an anastomosis to full tree 21 v2
+copied radius_perf.exelem file from reprosim to full_tree_21
+ and saved the arterial element radii as arterial_radius_21_v2.exelem
+
+InsertAnastomosis.py
+inputs: path clean_tree/full_tree_21
+full_tree.exelem full_tree.exnode arterial_radius_21_v2.exelem
+
+outputs clean_tree/full_tree_anastomosis
+ full_tree_anast.exnode full_tree_anast.exelem
+ full_tree_anast_radii.ipfiel
+
+ConvertEXtoIP.py output full_tree_anast.ipnode full_tree_anast.ipelem
+
+
 
 
 Roz's paper -Whole placental imaging allowed visualisation of vessels down  to 300micron,representing the stem villi arterioles

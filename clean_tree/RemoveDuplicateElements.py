@@ -1,59 +1,14 @@
 #!/usr/bin/env python
- 
-import placentagen as pg
-import numpy as np
-import pandas as pd
 
+from placenta_utilities import *
 
 #read the node file
-#node_file = pd.read_csv('skeleton_mb.exnode',sep="\n", header=None) #1st run
-#node_file = pd.read_csv('new_nodes_v2.exnode',sep="\n", header=None) #2nd run large vessels
-#node_file = pd.read_csv('small_vessels/skeleton_sv.exnode',sep="\n", header=None) #1st run small vessels
-node_file = pd.read_csv('chorionic_vessels/chor_nodes_v1.exnode',sep="\n", header=None)
-
-num_nodes = (len(node_file) - 6)/4
-node_loc = np.zeros((num_nodes, 4))
-
-i=0
-for n in range(7,len(node_file),4):
-    node_loc[i][0] = i
-    node_loc[i][1] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(8,len(node_file),4):
-    node_loc[i][2] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(9,len(node_file),4):
-    node_loc[i][3] = node_file[0][n]
-    i=i+1
-
-#write the exnode file
-#pg.export_ex_coords(node_loc,'test_node_file','test_node_file','exnode')
-
+node_loc = pg.import_exnode_tree('chorionic_vessels/chor_nodes_cycle3_v4.exnode')['nodes'][:, 0:4]
+num_nodes = len(node_loc)
 
 #read the element file
-#element_file = pd.read_csv('skeleton_mb.exelem',sep="\n", header=None) #1st run
-#element_file = pd.read_csv('new_elems_v2.exelem',sep="\n", header=None) #2nd run large vessels
-#element_file = pd.read_csv('small_vessels/skeleton_sv.exelem',sep="\n", header=None) #1st run small vessels
-element_file = pd.read_csv('chorionic_vessels/chor_elems_v1.exelem',sep="\n", header=None)
-
-num_elems = (len(element_file)-31)/5
-elems = np.zeros((num_elems, 3), dtype=int)
-
-i=0
-for n in range(33, len(element_file),5):
-    elems[i][0] = i  # creating new element
-    nodes = element_file[0][n].split()
-    elems[i][1] = int(nodes[0]) - 1 # starts at this node (-1)
-    elems[i][2] = int(nodes[1]) - 1 # ends at this node (-1)
-    i = i+1
-
-# write the exelem file
-#pg.export_exelem_1d(elems, 'test_elems', 'test_elems')
-
+elems = import_elem_file('chorionic_vessels/chor_elems_cycle3_v4.exelem')
+num_elems = len(elems)
 
 elems_to_remove_list = []
 elems_df = pd.DataFrame(elems)
@@ -75,7 +30,7 @@ elems_to_remove.sort()
 #remove elements write out the new element and node files
 
 #write the node file
-pg.export_ex_coords(node_loc,'chor_nodes_v2','chorionic_vessels/chor_nodes_v2','exnode')
+pg.export_ex_coords(node_loc,'chor_nodes_cycle3_v5','chorionic_vessels/chor_nodes_cycle3_v5','exnode')
 
 old_to_new_elem_temp = np.ones(num_elems, dtype=bool)
 old_to_new_elem = np.zeros(num_elems, dtype=int)
@@ -104,5 +59,5 @@ for i in range(0, num_elems):
         new_elems[new_elem][2] = elems[i][2]
 
 #write the new element file
-pg.export_exelem_1d(new_elems, 'chor_elems_v2', 'chorionic_vessels/chor_elems_v2')
+pg.export_exelem_1d(new_elems, 'chor_elems_cycle3_v5', 'chorionic_vessels/chor_elems_cycle3_v5')
 

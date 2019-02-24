@@ -1,8 +1,6 @@
 #!/usr/bin/env python
  
-import placentagen as pg
-import numpy as np
-import pandas as pd
+from placenta_utilities import *
 
 #gets the total length of all generations of branches connected to the node, nodes and elements in all generations
 #and nodes that have already been seen until a length threshold is reached
@@ -59,99 +57,24 @@ def get_branch_length(node,upstream_elem,total_length,length_threshold):
 
     return branch_info
 
-
 #read the node file
-#node_file = pd.read_csv('new_nodes_500.exnode',sep="\n", header=None) #1st run
-#node_file = pd.read_csv('new_nodes_tb_5.exnode',sep="\n", header=None) #2nd run
-#node_file = pd.read_csv('new_nodes_sb_30_30_v2.exnode',sep="\n", header=None) #3rd run
-node_file = pd.read_csv('new_nodes_v8.exnode',sep="\n", header=None)
-
-num_nodes = (len(node_file) - 6)/4
-node_loc = np.zeros((num_nodes, 4))
-
-i=0
-for n in range(7,len(node_file),4):
-    node_loc[i][0] = i
-    node_loc[i][1] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(8,len(node_file),4):
-    node_loc[i][2] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(9,len(node_file),4):
-    node_loc[i][3] = node_file[0][n]
-    i=i+1
-
-#write the exnode file
-#pg.export_ex_coords(node_loc,'test_node_file','test_node_file','exnode')
-
+node_loc = pg.import_exnode_tree('new_nodes_v8.exnode')['nodes'][:, 0:4]
+num_nodes = len(node_loc)
 
 #read the element file
-#element_file = pd.read_csv('new_elems_500.exelem',sep="\n", header=None) #1st run
-#element_file = pd.read_csv('new_elems_tb_5.exelem',sep="\n", header=None) #2nd run
-#element_file = pd.read_csv('new_elems_sb_30_30_v2.exelem',sep="\n", header=None) #3rd run
-element_file = pd.read_csv('new_elems_v8.exelem',sep="\n", header=None)
-
-num_elems = (len(element_file)-31)/5
-elems = np.zeros((num_elems, 3), dtype=int)
-
-i=0
-for n in range(33, len(element_file),5):
-    elems[i][0] = i  # creating new element
-    nodes = element_file[0][n].split()
-    elems[i][1] = int(nodes[0]) - 1 # starts at this node (-1)
-    elems[i][2] = int(nodes[1]) - 1 # ends at this node (-1)
-    i = i+1
-
-# write the exelem file
-#pg.export_exelem_1d(elems, 'test_elems', 'test_elems')
+elems = import_elem_file('new_elems_v8.exelem')
+num_elems = len(elems)
 
 #calculate element lengths
-elem_length = np.zeros((num_elems))
-for i in range(0,num_elems):
-    node1 = elems[i][1]
-    node2 = elems[i][2]
-    x1 = node_loc[node1][1]
-    y1 = node_loc[node1][2]
-    z1 = node_loc[node1][3]
+elem_length = get_elem_length(node_loc, elems)
 
-    x2 = node_loc[node2][1]
-    y2 = node_loc[node2][2]
-    z2 = node_loc[node2][3]
-    # calculate the length of each element
-    elem_length[i] = np.sqrt(np.float_power(x2 - x1,2) + np.float_power(y2 - y1,2) + np.float_power(z2 - z1,2))
-
-#print elem_length to csv
-#df1 = pd.DataFrame(elem_length)
-#df1.to_csv('elem_length.csv')
+elems_at_node = get_elements_at_a_node(node_loc,elems)
 
 #radius_file = pd.read_csv('elem_radius.csv') #1st run
 #radius_file = pd.read_csv('elem_radius_tb_5.csv') #2nd run
 #radius_file = pd.read_csv('elem_radius_sb_30_30_v2.csv') #3rd run
 radius_file = pd.read_csv('element_radius_large_vessels_v4.csv')
-
-
 elem_radius = radius_file.iloc[:]['radius'].tolist()
-
-#populate the elems_at_node array listing the elements connected to each node
-elems_at_node = np.zeros((num_nodes, 10), dtype=int)
-for i in range(0,num_elems):
-
-      elems_at_node[elems[i][1]][0] = elems_at_node[elems[i][1]][0] + 1
-      j = elems_at_node[elems[i][1]][0]
-      elems_at_node[elems[i][1]][j] = elems[i][0]
-
-      elems_at_node[elems[i][2]][0] = elems_at_node[elems[i][2]][0] + 1
-      j = elems_at_node[elems[i][2]][0]
-      elems_at_node[elems[i][2]][j] = elems[i][0]
-
-#print elems_at_node to csv
-#df = pd.DataFrame(elems_at_node)
-#df.to_csv('elems_at_node_500.csv')
-
 
 #branching nodes - nodes that have more than 2 elements connected to them
 branching_nodes = []

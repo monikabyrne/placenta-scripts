@@ -1,9 +1,8 @@
 #!/usr/bin/env python
- 
-import placentagen as pg
-import numpy as np
-import pandas as pd
+
 import scipy.spatial as spatial
+
+from placenta_utilities import *
 
 #calculates the shortest distance between a point an a plane
 def get_point_to_plane_dist(point_coords,A,B,C,D):
@@ -17,7 +16,7 @@ def get_point_to_plane_dist(point_coords,A,B,C,D):
 #parameters
 #look for vessel surface points within what maximum radius from element centre?
 #radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
-surface_points_max_radius = 2
+surface_points_max_radius = 4
 
 #what is the maximum distance the radius points are allowed to fall from the plane passing through the centre
 #of the element and perpendicular to the element
@@ -25,58 +24,18 @@ surface_points_max_radius = 2
 max_distance_from_plane = 0.1165
 
 
-#read the node file
-#node_file = pd.read_csv('new_nodes_500.exnode',sep="\n", header=None) #1st run
-#node_file = pd.read_csv('new_nodes_v4.exnode',sep="\n", header=None) #2nd run
-#node_file = pd.read_csv('chorionic_vessels/chor_nodes_cycle2_v6.exnode',sep="\n", header=None) #3rd run
-node_file = pd.read_csv('small_vessels/sv_nodes_v3.exnode',sep="\n", header=None)
+#import the node file
+node_loc = pg.import_exnode_tree('chorionic_vessels/chor_nodes_cycle2_v6.exnode')['nodes'][:, 0:4]
+num_nodes = len(node_loc)
 
-num_nodes = (len(node_file) - 6)/4
-node_loc = np.zeros((num_nodes, 4))
-
-i=0
-for n in range(7,len(node_file),4):
-    node_loc[i][0] = i
-    node_loc[i][1] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(8,len(node_file),4):
-    node_loc[i][2] = node_file[0][n]
-    i=i+1
-
-i=0
-for n in range(9,len(node_file),4):
-    node_loc[i][3] = node_file[0][n]
-    i=i+1
-
-#write the exnode file
-#pg.export_ex_coords(node_loc,'test_node_file','test_node_file','exnode')
-
-#read the element file
-#element_file = pd.read_csv('new_elems_500.exelem',sep="\n", header=None) #1st run
-#element_file = pd.read_csv('new_elems_v4.exelem',sep="\n", header=None) #2nd run
-#element_file = pd.read_csv('chorionic_vessels/chor_elems_cycle2_v6.exelem',sep="\n", header=None) #3rd run
-element_file = pd.read_csv('small_vessels/sv_elems_v3.exelem',sep="\n", header=None)
-
-num_elems = (len(element_file)-31)/5
-elems = np.zeros((num_elems, 3), dtype=int)
-
-i=0
-for n in range(33, len(element_file),5):
-    elems[i][0] = i  # creating new element
-    nodes = element_file[0][n].split()
-    elems[i][1] = int(nodes[0]) - 1 # starts at this node (-1)
-    elems[i][2] = int(nodes[1]) - 1 # ends at this node (-1)
-    i = i+1
-
-# write the exelem file
-#pg.export_exelem_1d(elems, 'test_elems', 'test_elems')
+#import the element file
+elems = import_elem_file('chorionic_vessels/chor_elems_cycle2_v6.exelem')
+num_elems = len(elems)
 
 
 #read the vessel surface data points file
-#points_file = pd.read_csv('chorionic_vessels/large_vessel_surface_v2.exdata',sep="\n", header=None) #3rd run
-points_file = pd.read_csv('small_vessels/small_vessel_surface_rescaled.exdata',sep="\n", header=None) #small vessels
+points_file = pd.read_csv('chorionic_vessels/large_vessel_surface_v2.exdata',sep="\n", header=None) #3rd run
+#points_file = pd.read_csv('small_vessels/small_vessel_surface_rescaled.exdata',sep="\n", header=None) #small vessels
 
 
 num_points = (len(points_file) - 6)/4
@@ -290,7 +249,8 @@ for i in range(0,num_elems):
                             0,0,0,0]
 
 #print to csv
-elems_info_df.to_csv('small_vessels/small_vessel_radius_cycle2_v2.csv')
+elems_info_df.to_csv('chorionic_vessels/large_vessel_radius_cycle2_v2.csv')
+#elems_info_df.to_csv('small_vessels/small_vessel_radius_cycle2_v2.csv')
 
 
 
