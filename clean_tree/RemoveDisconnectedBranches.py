@@ -1,10 +1,32 @@
 #!/usr/bin/env python
  
 from placenta_utilities import *
+from os.path import expanduser
+home = expanduser("~")
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12'
+group_name = 'p49_large_vessels_step12'
+
+#output files with nodes and elements that were removed
+node_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12_removed'
+elems_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12_removed'
+group_name_removed = group_name + '_removed'
+#parameters
+#length_threshold - connected groups of branches under this threshold will be removed
+length_threshold = 410
+
+
+
 
 #gets the total length of all generations of branches connected to the node, nodes and elements in all generations
 #and nodes that have already been seen until a length threshold is reached
-def get_downstream_length(node,upstream_elem,total_length,length_threshold):
+def get_downstream_length(node,upstream_elem,total_length,length_threshold,seen_nodes):
+
+    seen_nodes.append(node)
     gr_nodes = []
     gr_nodes.append(node)
     # get all elements connected to the node (apart from the upstream element) and sum up their lengths
@@ -26,7 +48,7 @@ def get_downstream_length(node,upstream_elem,total_length,length_threshold):
                     node2 = temp_node2
                 if (node == temp_node2):
                     node2 = temp_node1
-                subgroup_info = get_downstream_length(node2,elem,total_length,length_threshold)
+                subgroup_info = get_downstream_length(node2,elem,total_length,length_threshold,seen_nodes)
                 total_length = subgroup_info['length']
                 gr_elems.extend(subgroup_info['gen_elems'])
                 gr_nodes.extend(subgroup_info['gen_nodes'])
@@ -40,11 +62,11 @@ def get_downstream_length(node,upstream_elem,total_length,length_threshold):
 
 
 #read the node file
-node_loc = pg.import_exnode_tree('chorionic_vessels/chor_nodes_cycle3_v3.exnode')['nodes'][:, 0:4]
+node_loc = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]
 num_nodes = len(node_loc)
 
 #read the element file
-elems = import_elem_file('chorionic_vessels/chor_elems_cycle3_v3.exelem')
+elems = import_elem_file(elems_in_file)
 num_elems = len(elems)
 
 #calculate element lengths
@@ -68,44 +90,45 @@ for i in range(0,num_nodes):
 
 #remove short disconnected branches
 
-#calculate which groups of elements and nodes are below a length threshold - these nodes and elements will be
+#calculate which groups of connected elements and nodes are below a length threshold - these nodes and elements will be
 #removed later
-#length_threshold = 500 #1st run
-length_threshold = 100
+
 short_group_elems = []
 short_group_nodes = []
 
+seen_nodes = []
 for node in end_nodes:
 
-    gr_nodes = []
-    gr_nodes.append(node)
-    # get the single element attached to this node
-    elem = elems_at_node[node][1]
-    gr_elems = []
-    gr_elems.append(elem)
-    # add length of the current element
-    total_length = elem_length[elem]
-    if (total_length < length_threshold):
-        # get the second node for that element
-        temp_node1 = elems[elem][1]
-        temp_node2 = elems[elem][2]
-        if (node == temp_node1):
-            node2 = temp_node2
-        if (node == temp_node2):
-            node2 = temp_node1
-        group_info = get_downstream_length(node2,elem,total_length,length_threshold)
-        total_length = group_info['length']
+    if node not in seen_nodes:
+        seen_nodes.append(node)
+        gr_nodes = []
+        gr_nodes.append(node)
+        # get the single element attached to this node
+        elem = elems_at_node[node][1]
+        gr_elems = []
+        gr_elems.append(elem)
+        # add length of the current element
+        total_length = elem_length[elem]
         if (total_length < length_threshold):
-            gr_elems.extend(group_info['gen_elems'])
-            gr_nodes.extend(group_info['gen_nodes'])
-            #populate arrays of nodes and elements to be removed
-            short_group_elems.extend(gr_elems)
-            short_group_nodes.extend(gr_nodes)
+            # get the second node for that element
+            temp_node1 = elems[elem][1]
+            temp_node2 = elems[elem][2]
+            if (node == temp_node1):
+                node2 = temp_node2
+            if (node == temp_node2):
+                node2 = temp_node1
+            group_info = get_downstream_length(node2,elem,total_length,length_threshold,seen_nodes)
+            total_length = group_info['length']
+            if (total_length < length_threshold):
+                gr_elems.extend(group_info['gen_elems'])
+                gr_nodes.extend(group_info['gen_nodes'])
+                #populate arrays of nodes and elements to be removed
+                short_group_elems.extend(gr_elems)
+                short_group_nodes.extend(gr_nodes)
 
 print('short_group_elems',len(set(short_group_elems)),set(short_group_elems))
 elems_to_remove = []
 elems_to_remove.extend(set(short_group_elems))
-#elems_to_remove.extend([1372, 1373]) #temp
 elems_to_remove.sort()
 print('elems_to_remove',len(elems_to_remove),elems_to_remove)
 
@@ -116,8 +139,6 @@ print ('short_group_nodes',len(set(short_group_nodes)),set(short_group_nodes))
 nodes_to_remove = orphan_nodes
 #short disconnected branches
 nodes_to_remove.extend(set(short_group_nodes))
-
-#nodes_to_remove.extend([147]) #temp
 nodes_to_remove.sort()
 print('nodes_to_remove',len(nodes_to_remove),nodes_to_remove)
 
@@ -132,8 +153,6 @@ for elem in elems_to_remove:
     if (node2 not in nodes_to_remove):
         print ('element',elem, 'node',node2,'not in nodes to remove')
 
-
-version = '_v2'
 
 old_to_new_node_temp = np.zeros(num_nodes, dtype=bool)
 old_to_new_node = np.zeros(num_nodes, dtype=int)
@@ -170,9 +189,8 @@ for i in range(0,num_nodes):
         nodes_remove_loc[new_node][1] = node_loc[i][1]
         nodes_remove_loc[new_node][2] = node_loc[i][2]
         nodes_remove_loc[new_node][3] = node_loc[i][3]
-#write the new node file
-name = 'nodes_remove_'+str(length_threshold) + version
-pg.export_ex_coords(nodes_remove_loc, name, name, 'exnode')
+#write the node file with removed nodes
+pg.export_ex_coords(nodes_remove_loc, group_name_removed, node_out_file_removed, 'exnode')
 
 
 elems_remove = np.zeros((len(elems_to_remove), 3), dtype=int)
@@ -187,9 +205,8 @@ for i in range(0, num_elems):
         elems_remove[new_elem][2] = old_to_new_node[elems[i][2]]
         if (old_to_new_node[elems[i][2]] == -1):
             print('elem', i, 'new elem', new_elem, 'old node', elems[i][2])
-#write the new element file
-name = 'elems_remove_'+str(length_threshold) + version
-pg.export_exelem_1d(elems_remove, name, name)
+#write the element file with removed elements
+pg.export_exelem_1d(elems_remove, group_name_removed, elems_out_file_removed)
 
 #remove elements and nodes and write out the new element and node files
 
@@ -233,8 +250,7 @@ for i in range(0,num_nodes):
         new_node_loc[new_node][2] = node_loc[i][2]
         new_node_loc[new_node][3] = node_loc[i][3]
 #write the new node file
-#name = 'sv_nodes_'+str(length_threshold) + version
-pg.export_ex_coords(new_node_loc, 'chor_nodes_cycle3_v4', 'chorionic_vessels/chor_nodes_cycle3_v4', 'exnode')
+pg.export_ex_coords(new_node_loc, group_name, node_out_file, 'exnode')
 
 
 new_elems = np.zeros((num_elems-len(elems_to_remove), 3), dtype=int)
@@ -250,5 +266,4 @@ for i in range(0, num_elems):
         if (old_to_new_node[elems[i][2]] == -1):
             print('elem', i, 'new elem', new_elem, 'old node', elems[i][2])
 #write the new element file
-#name = 'sv_elems_'+str(length_threshold) + version
-pg.export_exelem_1d(new_elems, 'chor_elems_cycle3_v4', 'chorionic_vessels/chor_elems_cycle3_v4')
+pg.export_exelem_1d(new_elems, group_name, elems_out_file)

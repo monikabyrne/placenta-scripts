@@ -1,32 +1,32 @@
 #!/usr/bin/env python
 
 
-from get_radii_stats import *
+from vessel_stats_utilities import *
+from os.path import expanduser
 
 #Parameters
 
-path = 'full_tree_avg_13'
-#path = 'test_tree'
-#path = 'chorionic_tree_reprosim_results'
+#input and output file names
+home = expanduser("~")
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
+radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17.exelem'
+path = home+'/placenta_patient_49/chorionic_vessel_stats'
 
+
+#if the tree contains chorionic and IVS vessels, stats can be reported separately for these
+#set chorionic elements to the last index of a chorionic element, if all elements are chorionic, set chorionic_elements to 0
 #chorionic_elements = 1427
 #chorionic_elements = 3
 chorionic_elements = 0
 
-#node and element file names, if not given full_tree.exnode and arterial_tree.exelem is used
-node_file = 'full_tree.exnode'
-elem_file = 'arterial_tree.exelem'
-#node_file = 'chorionic_tree.exnode'
-#elem_file = 'chorionic_tree.exelem'
-
-
 print('path = ' + path)
 
 full_geom = {}
-full_geom['nodes'] = pg.import_exnode_tree(path + '/' + node_file)['nodes'][:, 0:4]
+full_geom['nodes'] = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]
 num_nodes = len(full_geom['nodes'])
 print ('num nodes = ' + str(num_nodes))
-full_geom['elems'] = pg.import_exelem_tree(path + '/' + elem_file)['elems']
+full_geom['elems'] = pg.import_exelem_tree(elems_in_file)['elems']
 num_elems = len(full_geom['elems'])
 print ('num elems = ' + str(num_elems))
 
@@ -43,7 +43,7 @@ max_strahler = max(strahler_orders)
 elem_connectivity = pg.element_connectivity_1D(full_geom['nodes'], full_geom['elems'])
 
 #element diameters
-elem_radii = import_elem_radius(path + '/radius_perf.exelem')
+elem_radii = import_elem_radius(radius_in_file_exelem)
 elem_diameter = elem_radii * 2
 
 
@@ -92,9 +92,7 @@ if chorionic_elements > 0:
     ivs_elems_df = elem_info_df.iloc[chorionic_elements:]
     # ivs_elems_df.to_csv('ivs_elems.csv')
 
-
 # branch properties by Strahler order
-
 branch_types = ['all', 'major', 'minor']
 
 for bt in range(0,3):
@@ -111,7 +109,6 @@ for bt in range(0,3):
         filename = path + '/' + branch_type + '_IVS_branch_stats_by_Strahler_order.csv'
         print 'Saving element stats by Strahler order for IVS elements in file ' + filename
         elem_stats_by_strahler(ivs_elems_df,filename,branch_type)
-
 
 
 print_parent_and_daughter_diameters(num_elems,elem_connectivity,branch_diameters,

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+
 import placentagen as pg
 import numpy as np
 import matplotlib.pyplot as plt
 from tabulate import tabulate
-
 import pandas as pd
 
 
@@ -62,7 +62,7 @@ def get_length_and_diameter_ratios(branch_lengths,branch_diameters,branch_start_
                                                  length_to_diameter_ratios[elem],
                                                  diameter_ratios[last_elem_in_branch]]
 
-    test_df.to_csv(path +'/ratios.csv')
+    test_df.to_csv(path +'/length_and_diameter_ratios.csv')
 
     return length_ratios,length_to_diameter_ratios,diameter_ratios
 
@@ -299,7 +299,7 @@ def get_branch_lengths_and_diameters(node_loc,elems,elem_connectivity,lengths,el
     num_elems = len(elems)
     num_nodes = len(node_loc)
 
-    # populate the elems_at_node array listing the elements connected to each node
+    # populate the count of elements at a node array
     elems_count_at_node = np.zeros(num_nodes)
     for i in range(0, num_elems):
         for x in range(1, 3):

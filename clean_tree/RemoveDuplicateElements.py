@@ -1,13 +1,22 @@
 #!/usr/bin/env python
 
 from placenta_utilities import *
+from os.path import expanduser
+home = expanduser("~")
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/matlab_skeleton_graph/p49_skeleton_large_vessels.exnode'
+elems_in_file = home+'/placenta_patient_49/matlab_skeleton_graph/p49_skeleton_large_vessels.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1'
+group_name = 'p49_large_vessels_step1'
 
 #read the node file
-node_loc = pg.import_exnode_tree('chorionic_vessels/chor_nodes_cycle3_v4.exnode')['nodes'][:, 0:4]
+node_loc = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]
 num_nodes = len(node_loc)
 
 #read the element file
-elems = import_elem_file('chorionic_vessels/chor_elems_cycle3_v4.exelem')
+elems = import_elem_file(elems_in_file)
 num_elems = len(elems)
 
 elems_to_remove_list = []
@@ -30,7 +39,7 @@ elems_to_remove.sort()
 #remove elements write out the new element and node files
 
 #write the node file
-pg.export_ex_coords(node_loc,'chor_nodes_cycle3_v5','chorionic_vessels/chor_nodes_cycle3_v5','exnode')
+pg.export_ex_coords(node_loc,group_name,node_out_file,'exnode')
 
 old_to_new_elem_temp = np.ones(num_elems, dtype=bool)
 old_to_new_elem = np.zeros(num_elems, dtype=int)
@@ -59,5 +68,5 @@ for i in range(0, num_elems):
         new_elems[new_elem][2] = elems[i][2]
 
 #write the new element file
-pg.export_exelem_1d(new_elems, 'chor_elems_cycle3_v5', 'chorionic_vessels/chor_elems_cycle3_v5')
+pg.export_exelem_1d(new_elems, group_name, elems_out_file)
 

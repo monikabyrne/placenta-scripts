@@ -5,40 +5,27 @@ import numpy as np
 import pandas as pd
 
 
-def find_inlet_node(nodes, elems,elem_connectivity):
+def find_inlet_nodes(nodes, elems,elem_connectivity):
 
-    num_elems = len(elems)
-    i = 0
-    inlet_found = False
-    inlet_node = -1
-    while not inlet_found and i< num_elems:
-       #find the element that doesn't have any upstream elements
-       if elem_connectivity['elem_up'][i][0] == 0:
-           inlet_found = True
-       else:
-           i = i + 1
-    if inlet_found:
+    inlet_nodes = []
+    inlet_elems = find_inlet_elems(elems,elem_connectivity)
+    for i in inlet_elems:
         #first node of the element is the inlet node
-        inlet_node = elems[i][1]
+        inlet_nodes.append(elems[i][1])
 
-    return inlet_node
+    return inlet_nodes
 
-def find_inlet_elem(elems,elem_connectivity):
+def find_inlet_elems(elems,elem_connectivity):
 
     num_elems = len(elems)
-    i = 0
-    inlet_found = False
-    inlet_elem = -1
-    while not inlet_found and i< num_elems:
-       #find the element that doesn't have any upstream elements
-       if elem_connectivity['elem_up'][i][0] == 0:
-           inlet_found = True
-       else:
-           i = i + 1
-    if inlet_found:
-       inlet_elem = i
 
-    return inlet_elem
+    inlet_elems = []
+    for i in range(0,num_elems):
+       #find the elements that don't have any upstream elements
+       if elem_connectivity['elem_up'][i][0] == 0:
+           inlet_elems.append(i)
+
+    return inlet_elems
 
 def get_elements_at_a_node(nodes, elems):
 
@@ -60,27 +47,26 @@ def get_elements_at_a_node(nodes, elems):
     return elems_at_node
 
 
-def renumber(first_node,elems,anastomosis):
+def renumber(inlet_node, elems, anast_exists, anast_elem):
     # get all elements connected to the node that we haven't seen
     global element_number
     global old_to_new_elem
     global seen_elements
     global elems_at_node
-    connected_elems_no = elems_at_node[first_node][0]
+    connected_elems_no = elems_at_node[inlet_node][0]
     for i in range(0, connected_elems_no):
-        elem = elems_at_node[first_node][i + 1]  # elements start at column index 1
+        elem = elems_at_node[inlet_node][i + 1]  # elements start at column index 1
         if not seen_elements[elem]:
             seen_elements[elem] = True
             old_to_new_elem[elem] = element_number
             element_number = element_number + 1
-            if elem != anastomosis: #if this is the anastomosis element stop going downstream to renumber elements
+            if not anast_exists or (elem != anast_elem): #if this is the anastomosis element stop going downstream to renumber elements
                 second_node = elems[elem][2]
-                renumber(second_node,elems,anastomosis)
+                renumber(second_node, elems, anast_exists, anast_elem)
     return
 
-def renumber_elems(node_loc, elems, elem_connectivity,anastomosis):
+def renumber_elems(node_loc, elems, elem_connectivity, anast_exists, anast_elem):
 
-    first_node = find_inlet_node(node_loc, elems, elem_connectivity)
     global element_number
     global old_to_new_elem
     global elems_at_node
@@ -91,7 +77,10 @@ def renumber_elems(node_loc, elems, elem_connectivity,anastomosis):
     seen_elements = np.zeros(num_elems, dtype=bool)
 
     element_number = 0
-    renumber(first_node,elems,anastomosis)
+    inlet_nodes = find_inlet_nodes(node_loc, elems, elem_connectivity)
+
+    for in_node in inlet_nodes:
+        renumber(in_node, elems, anast_exists, anast_elem)
 
     new_elems = np.zeros((num_elems, 3), dtype=int)
 
@@ -123,7 +112,7 @@ def import_elem_file(filename):
     i = 0
     for n in range(31, len(element_file), 5):
         elem_no_text = element_file[0][n].split()
-        elems[i][0] = elem_no_text[1]
+        elems[i][0] = int(elem_no_text[1]) - 1 #in python element numbers start at 0, reprosim at 1
         i = i + 1
 
     i = 0
@@ -145,6 +134,32 @@ def element_centre_xyz(elem,node_loc,elems):
     z = (z1 + z2)/2
     return x,y,z
 
+#this function returns the coordinates of a node that is a desired distance away from the first node
+#of an element
+#new node coordinates are calculated by scaling a unit vector for the element to the desired distance
+def split_element_xyz(elem, node_loc, elems, distance):
+    node1 = elems[elem][1]
+    node1_coords = np.array(node_loc[node1][1:4])
+    unit_vector = get_unit_vector_for_elem(elem, node_loc, elems)
+    new_node = node1_coords + distance * unit_vector
+
+    return new_node
+
+#create a vector by subtracting the coordinates of node1 from node2 and normalise this vector by dividing it by
+#its length
+def get_unit_vector_for_elem(elem, node_loc, elems):
+
+    node1 = elems[elem][1]
+    node2 = elems[elem][2]
+    (x1,y1,z1) = node_loc[node1][1:4]
+    (x2,y2,z2) = node_loc[node2][1:4]
+
+    elem_length = np.sqrt(np.float_power(x2 - x1, 2) + np.float_power(y2 - y1, 2) + np.float_power(z2 - z1, 2))
+
+    unit_vector = np.array([(x2 - x1)/elem_length, (y2 - y1)/elem_length, (z2 - z1)/elem_length])
+
+    return unit_vector
+
 
 def import_elem_radius(file_name):
     element_file = pd.read_csv(file_name, sep="\n", header=None)
@@ -165,7 +180,7 @@ def write_radius_as_ipfiel(node_loc,elems, elem_radii, filename):
     # first element - both nodes will have the same radius as the element - for all other elements assign the element radius
     # to the second node
     elem_connectivity = pg.element_connectivity_1D(node_loc, elems)
-    inlet_element = find_inlet_elem(elems, elem_connectivity)
+    inlet_elements = find_inlet_elems(elems, elem_connectivity)
     num_nodes = len(node_loc)
     num_elems = len(elems)
 
@@ -173,7 +188,7 @@ def write_radius_as_ipfiel(node_loc,elems, elem_radii, filename):
     for i in range(0, num_elems):
         node1 = elems[i][1]
         node2 = elems[i][2]
-        if i == inlet_element:
+        if i in inlet_elements:
             node_radius[node1] = elem_radii[i]
             node_radius[node2] = elem_radii[i]
         else:
@@ -272,5 +287,85 @@ def write_ipnode(node_loc, filename):
         f.write("The Xj(3) coordinate is [ 0.00000E+00]:    {0}\n".format(node_loc[n][3]))
 
     f.close()
+
+    return 0
+
+
+######
+# Modified from placentagen (https://github.com/VirtualPregnancy/placentagen), Author Rachel Smith
+# Writes values to a cmgui exelem file
+# Inputs: data - an N x 1 array with a value for each element in the tree
+#         groupname - group name that will appear in cmgui
+#         filename - name that the file is saved as
+#         name - name that values will be called in cmgui
+# Outputs: an "exelem" file containing the data value for each element, named according to names specified
+######
+
+def export_solution_2(data, groupname, filename, name):
+    # Write header
+    type = "exelem"
+    data_num = len(data)
+    filename = filename + '.' + type
+    f = open(filename, 'w')
+    f.write(" Group name: %s\n" % groupname)
+    f.write("Shape. Dimension=1\n")
+    f.write("#Scale factor sets=0\n")
+    f.write("#Nodes=0\n")
+    f.write(" #Fields=1\n")
+    f.write("1) " + name + ", field, rectangular cartesian, #Components=1\n")
+    f.write(name + ".  l.Lagrange, no modify, grid based.\n")
+    f.write(" #xi1=1\n")
+
+    # Write element values
+    for x in range(0, data_num):
+        f.write(" Element:            %s 0 0\n" % int(x + 1))
+        f.write("   Values:\n")
+        f.write("          %s" % np.squeeze(data[x]))
+        f.write("   %s \n" % np.squeeze(data[x]))
+    f.close()
+
+    return 0
+
+
+def export_elem_subset(elem_subset,elems,group_name,filename):
+    elem_subset.sort()
+    subset_of_elems = np.zeros((len(elem_subset), 3), dtype=int)
+    i = 0
+    for element in elem_subset:
+        subset_of_elems[i][0] = elems[element][0]
+        subset_of_elems[i][1] = elems[element][1]
+        subset_of_elems[i][2] = elems[element][2]
+        i = i + 1
+    pg.export_exelem_1d(subset_of_elems, group_name, filename)
+
+    return 0
+
+
+def export_node_subset(node_subset,node_loc,group_name,filename):
+    node_subset.sort()
+    subset_of_nodes = np.zeros((len(node_subset), 4))
+    i = 0
+    for node in node_subset:
+        subset_of_nodes[i][0] = node_loc[node][0]
+        subset_of_nodes[i][1] = node_loc[node][1]
+        subset_of_nodes[i][2] = node_loc[node][2]
+        subset_of_nodes[i][3] = node_loc[node][3]
+        i = i + 1
+    pg.export_ex_coords(subset_of_nodes, group_name, filename, 'exnode')
+
+    return 0
+
+
+def export_datapoint_subset(datapoint_subset,data_points,group_name,filename):
+    datapoint_subset.sort()
+    subset_of_points = np.zeros((len(datapoint_subset), 4))
+    i = 0
+    for point in datapoint_subset:
+        subset_of_points[i][0] = data_points[point][0]
+        subset_of_points[i][1] = data_points[point][1]
+        subset_of_points[i][2] = data_points[point][2]
+        subset_of_points[i][3] = data_points[point][3]
+        i = i + 1
+    pg.export_ex_coords(subset_of_points, group_name, filename, 'exdata')
 
     return 0

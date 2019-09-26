@@ -4,28 +4,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 import pandas as pd
-from get_radii_stats import *
+from vessel_stats_utilities import *
+from os.path import expanduser
+
+home = expanduser("~")
 
 #Parameters
 
-#path = 'full_tree_avg_13'
-path = 'chorionic_tree_reprosim_results'
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
+radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17.exelem'
+path = home+'/placenta_patient_49/chorionic_vessel_stats'
 
-
-#node and element file names, if not given full_tree.exnode and arterial_tree.exelem is used
-#node_file = 'full_tree.exnode'
-#elem_file = 'arterial_tree.exelem'
-node_file = 'chorionic_tree.exnode'
-elem_file = 'chorionic_tree.exelem'
-
-
-print('path = ' + path)
 
 full_geom = {}
-full_geom['nodes'] = pg.import_exnode_tree(path + '/' + node_file)['nodes'][:, 0:4]
+full_geom['nodes'] = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]
 num_nodes = len(full_geom['nodes'])
 print ('num nodes = ' + str(num_nodes))
-full_geom['elems'] = pg.import_exelem_tree(path + '/' + elem_file)['elems']
+full_geom['elems'] = pg.import_exelem_tree(elems_in_file)['elems']
 num_elems = len(full_geom['elems'])
 print ('num elems = ' + str(num_elems))
 
@@ -44,7 +41,7 @@ max_strahler = max(strahler_orders)
 elem_connectivity = pg.element_connectivity_1D(full_geom['nodes'],full_geom['elems'])
 
 #element diameters
-elem_radii = import_elem_radius(path + '/radius_perf.exelem')
+elem_radii = import_elem_radius(radius_in_file_exelem)
 elem_diameter = elem_radii * 2
 
 #element lengths

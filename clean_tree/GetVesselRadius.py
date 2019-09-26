@@ -3,6 +3,26 @@
 import scipy.spatial as spatial
 
 from placenta_utilities import *
+from os.path import expanduser
+home = expanduser("~")
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exelem'
+vessel_surface_points_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface_step4.exdata'
+
+vessel_radius_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_v2.csv'
+
+
+#look for vessel surface points within what maximum radius from element centre
+#radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
+surface_points_max_radius = 5
+
+#what is the maximum distance the radius points are allowed to fall from the plane passing through the centre
+#of the element and perpendicular to the element
+#1 before rescaling
+max_distance_from_plane = 0.1165
 
 #calculates the shortest distance between a point an a plane
 def get_point_to_plane_dist(point_coords,A,B,C,D):
@@ -13,28 +33,17 @@ def get_point_to_plane_dist(point_coords,A,B,C,D):
 
     return distance
 
-#parameters
-#look for vessel surface points within what maximum radius from element centre?
-#radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
-surface_points_max_radius = 4
-
-#what is the maximum distance the radius points are allowed to fall from the plane passing through the centre
-#of the element and perpendicular to the element
-#1 before rescaling
-max_distance_from_plane = 0.1165
-
-
 #import the node file
-node_loc = pg.import_exnode_tree('chorionic_vessels/chor_nodes_cycle2_v6.exnode')['nodes'][:, 0:4]
+node_loc = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]
 num_nodes = len(node_loc)
 
 #import the element file
-elems = import_elem_file('chorionic_vessels/chor_elems_cycle2_v6.exelem')
+elems = import_elem_file(elems_in_file)
 num_elems = len(elems)
 
 
 #read the vessel surface data points file
-points_file = pd.read_csv('chorionic_vessels/large_vessel_surface_v2.exdata',sep="\n", header=None) #3rd run
+points_file = pd.read_csv(vessel_surface_points_file,sep="\n", header=None) #3rd run
 #points_file = pd.read_csv('small_vessels/small_vessel_surface_rescaled.exdata',sep="\n", header=None) #small vessels
 
 
@@ -104,8 +113,6 @@ for i in range(0,num_elems):
     #A*x + B*y + C*z = D
 
     # get points in the blood vessel surface within a set radius from the centre of an element
-
-    #radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
     surface_points = point_tree.data[point_tree.query_ball_point(centre, surface_points_max_radius)]
 
     if len(surface_points) > 0:
@@ -249,7 +256,7 @@ for i in range(0,num_elems):
                             0,0,0,0]
 
 #print to csv
-elems_info_df.to_csv('chorionic_vessels/large_vessel_radius_cycle2_v2.csv')
+elems_info_df.to_csv(vessel_radius_file)
 #elems_info_df.to_csv('small_vessels/small_vessel_radius_cycle2_v2.csv')
 
 

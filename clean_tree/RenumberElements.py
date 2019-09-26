@@ -4,6 +4,8 @@ import placentagen as pg
 import numpy as np
 import pandas as pd
 
+#this script works for input files where element numbers are not sequential
+
 
 def renumber_elems(first_node_idx):
     # get all elements connected to the node that we haven't seen
