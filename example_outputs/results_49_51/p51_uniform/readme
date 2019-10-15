@@ -1,0 +1,70 @@
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/stats_after_radius_defined_main.py
+
+
+#input and output file names
+node_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/full_tree.exnode'
+elems_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_tree.exelem'
+radius_in_file_exelem  = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_radius.exelem'
+path = home+'/placenta_patient_49/results/p51_uniform'
+
+#if the tree contains chorionic and IVS vessels, stats can be reported separately for these
+#set chorionic elements to the last index of a chorionic element, if all elements are chorionic, set chorionic_elements to 0
+chorionic_elements = 1427
+
+
+path = /home/mbyr427/placenta_patient_49/results/p51_uniform
+num nodes = 117406
+num elems = 58702
+max strahler order = 11
+max horsfield order = 26
+max generations = 26
+Average number of generations at terminal units = 16.761307408181754
+Minimum number of generations at terminal units = 5
+Total length of vasculature (m) = 56.93594727949697
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/all_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for chorionic elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/all_chorionic_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for IVS elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/all_IVS_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/major_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for chorionic elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/major_chorionic_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for IVS elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/major_IVS_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/minor_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for chorionic elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/minor_chorionic_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for IVS elements in file /home/mbyr427/placenta_patient_49/results/p51_uniform/minor_IVS_branch_stats_by_Strahler_order.csv
+
+Process finished with exit code 0
+
+
+
+
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/strahler_ratios.py
+
+#input and output file names
+node_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/full_tree.exnode'
+elems_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_tree.exelem'
+radius_in_file_exelem  = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_radius.exelem'
+path = home+'/placenta_patient_49/results/p51_uniform'
+
+num nodes = 117406
+num elems = 58702
+max strahler order = 11
+max horsfield order = 26
+max generations = 26
+('orders', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+('mean length by Strahler order', array([ 0.78785712,  0.9060631 ,  1.23156223,  1.58389859,  2.05067275,
+        2.68619978,  4.16824867,  7.61571952, 17.58020443, 16.06424611,
+       13.38355521]))
+Strahler length ratio = 1.406081514233466
+r2 = 0.9473670294951134
+('orders', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+('mean diameter by Strahler order', array([0.071398  , 0.1057705 , 0.15639   , 0.23146   , 0.3440968 ,
+       0.51589548, 0.78502674, 1.41737837, 2.04613961, 2.99076843,
+       3.41048286]))
+Strahler diameter ratio = 1.5035738621873957
+r2 = 0.9953453959545907
+('orders', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+('frequency', array([28698, 17279,  6727,  2755,  1130,   477,   186,    80,    37,
+          20,     5]))
+Strahler branching ratio = 2.36774541203084
+Strahler r**2 = 0.9973344261493704
+
+Process finished with exit code 0

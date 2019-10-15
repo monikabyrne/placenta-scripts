@@ -1,0 +1,49 @@
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/compare_measures_for_two_trees.py
+path1 = /home/mbyr427/placenta_patient_49/results/p51_heterogeneous
+path2 = /home/mbyr427/placenta_patient_49/results/p51_uniform
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+path1
+mean length by Strahler order [ 0.71  0.83  1.13  1.5   1.97  2.69  4.2   6.42 14.45 18.17 19.24 10.4 ]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+mean length by Strahler order [ 0.79  0.91  1.23  1.58  2.05  2.69  4.17  7.62 17.58 16.06 13.38]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+path1
+mean diameter by Strahler order [0.07 0.1  0.15 0.21 0.3  0.44 0.69 1.18 1.89 2.81 3.23 3.6 ]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+mean diameter by Strahler order [0.07 0.11 0.16 0.23 0.34 0.52 0.79 1.42 2.05 2.99 3.41]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+path1
+number of branches by Strahler order [29264, 17601, 6968, 2743, 1127, 474, 194, 85, 39, 25, 4, 2]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+number of branches by Strahler order [28698, 17279, 6727, 2755, 1130, 477, 186, 80, 37, 20, 5]
+
+Process finished with exit code 0
+
+
+
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/compare_measures_for_two_trees.py
+path1 = /home/mbyr427/placenta_patient_49/results/p49_heterogeneous
+path2 = /home/mbyr427/placenta_patient_49/results/p49_uniform
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path1
+mean length by Strahler order [ 0.64  0.75  1.    1.27  1.72  2.85  5.31  7.17  9.41 12.6  10.14]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+mean length by Strahler order [0.69 0.81 1.1  1.44 1.88 2.68 5.94 7.52 9.44 9.52 9.09]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path1
+mean diameter by Strahler order [0.07 0.1  0.15 0.21 0.32 0.54 0.83 1.36 2.15 2.55 4.68]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+mean diameter by Strahler order [0.07 0.1  0.15 0.21 0.32 0.51 0.88 1.24 1.91 2.58 4.26]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path1
+number of branches by Strahler order [33778, 20273, 8071, 3183, 1285, 536, 222, 128, 51, 14, 13]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+path2
+number of branches by Strahler order [36139, 21918, 8506, 3336, 1359, 565, 248, 107, 60, 22, 16]
+
+Process finished with exit code 0

@@ -1,0 +1,67 @@
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/stats_after_radius_defined_main.py
+
+
+#Parameters
+
+#input and output file names
+home = expanduser("~")
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_v3.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_v3.exelem'
+radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_v3.exelem'
+path = home+'/placenta_patient_49/results/chorionic_vessel_stats'
+
+
+#if the tree contains chorionic and IVS vessels, stats can be reported separately for these
+#set chorionic elements to the last index of a chorionic element, if all elements are chorionic, set chorionic_elements to 0
+#chorionic_elements = 1427
+#chorionic_elements = 3
+chorionic_elements = 0
+
+
+
+path = /home/mbyr427/placenta_patient_49/chorionic_vessel_stats
+num nodes = 5092
+num elems = 5090
+max strahler order = 5
+max horsfield order = 27
+max generations = 27
+Total length of vasculature (m) = 3.792046852986533
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/chorionic_vessel_stats/all_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/chorionic_vessel_stats/major_branch_stats_by_Strahler_order.csv
+Saving element stats by Strahler order for all elements in file /home/mbyr427/placenta_patient_49/chorionic_vessel_stats/minor_branch_stats_by_Strahler_order.csv
+
+Process finished with exit code 0
+
+
+
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/results/strahler_ratios.py
+
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_v3.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_v3.exelem'
+radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_v3.exelem'
+path = home+'/placenta_patient_49/results/chorionic_vessel_stats'
+
+
+
+num nodes = 5092
+num elems = 5090
+max strahler order = 5
+max horsfield order = 27
+max generations = 27
+('orders', [1, 2, 3, 4, 5])
+('mean length by Strahler order', array([5.63623783, 6.17750794, 8.18208794, 9.1155211 , 7.8751453 ]))
+Strahler length ratio = 1.1116054611539408
+r2 = 0.687485594445405
+('orders', [1, 2, 3, 4, 5])
+('mean diameter by Strahler order', array([0.73248361, 1.18800996, 1.72202924, 2.64022619, 4.81213492]))
+Strahler diameter ratio = 1.5783019121125232
+r2 = 0.9932448897723195
+('orders', [1, 2, 3, 4, 5])
+('frequency', array([299, 172,  86,  27,  12]))
+Strahler branching ratio = 2.2893619305689366
+Strahler r**2 = 0.9840660587559045
+
+Process finished with exit code 0
+
