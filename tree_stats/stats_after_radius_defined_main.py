@@ -4,21 +4,18 @@
 from vessel_stats_utilities import *
 from os.path import expanduser
 
+home = expanduser("~")
 #Parameters
 
 #input and output file names
-home = expanduser("~")
-node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
-elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
-radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17.exelem'
-path = home+'/placenta_patient_49/chorionic_vessel_stats'
-
+node_in_file = home+'/Desktop/docs_to_upload_to_drive/reprosim_inputs_outputs/reprosim_results/output_patient_51_two_inlets_uniform/full_tree.exnode'
+elems_in_file = home+'/Desktop/docs_to_upload_to_drive/reprosim_inputs_outputs/reprosim_results/output_patient_51_two_inlets_uniform/arterial_tree.exelem'
+radius_in_file_exelem  = home+'/Desktop/docs_to_upload_to_drive/reprosim_inputs_outputs/reprosim_results/output_patient_51_two_inlets_uniform/arterial_radius.exelem'
+path = home+'/placenta_patient_49/results/p51_uniform'
 
 #if the tree contains chorionic and IVS vessels, stats can be reported separately for these
 #set chorionic elements to the last index of a chorionic element, if all elements are chorionic, set chorionic_elements to 0
-#chorionic_elements = 1427
-#chorionic_elements = 3
-chorionic_elements = 0
+chorionic_elements = 1427
 
 print('path = ' + path)
 
@@ -36,6 +33,12 @@ generations = tree_orders['generation']
 print('max strahler order = ' + str(max(strahler_orders)))
 print('max horsfield order = ' + str(max(tree_orders['horsfield'])))
 print('max generations = ' + str(max(generations)))
+
+# Average and min terminal generation(pathlength between the inlet and terminal unit
+path_generations = generations[(strahler_orders == 1)]
+
+print('Average number of generations at terminal units = ' + str(np.mean(path_generations)))
+print('Minimum number of generations at terminal units = ' + str(np.min(path_generations)))
 
 # get element connectivity to count the number of non-branching elements in the chorionic tree
 # get second nodes for chorionic elements -  add to count if number of connected elements is less than three

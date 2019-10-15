@@ -1,0 +1,667 @@
+process_high_fidelity_images.mlx
+
+
+output: skeleton graph
+
+
+placentaapps/write_skeleton_matlab
+
+
+
+placentaapps/clean_tree
+
+1. RemoveDuplicateElements.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/matlab_skeleton_graph/p49_skeleton_large_vessels.exnode'
+elems_in_file = home+'/placenta_patient_49/matlab_skeleton_graph/p49_skeleton_large_vessels.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1'
+group_name = 'p49_large_vessels_step1'
+
+/home/mbyr427/placentaapps/venv/bin/python /home/mbyr427/placentaapps/clean_tree/RemoveDuplicateElements.py
+('elems_to_remove', 3690)
+('num_elems', 11744)
+
+Process finished with exit code 0
+
+
+2. RemoveDisconnectedBranches.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step1.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2'
+group_name = 'p49_large_vessels_step2'
+
+#output files with nodes and elements that were removed
+node_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2_removed'
+elems_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2_removed'
+group_name_removed = group_name + '_removed'
+#parameters
+#length_threshold - connected groups of branches under this threshold will be removed
+length_threshold = 100
+
+
+3. WritePointCloud.py
+point_cloud_in_file = home+'/placenta_patient_49/isosurfaces/large_vessel_surface.txt'
+point_cloud_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface'
+group_name = 'large_vessel_surface'
+
+
+4. RescaleGraphs.py
+voxel_size = 0.1165
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step2.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4'
+group_name = 'p49_large_vessels_step4'
+
+#point cloud file of vessel surface
+point_cloud_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface.exdata'
+point_cloud_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface_step4'
+point_group_name = 'large_vessel_surface_step4'
+
+
+5. GetVesselRadius.py
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exelem'
+vessel_surface_points_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface_step4.exdata'
+vessel_radius_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius.csv'
+
+#look for vessel surface points within what maximum radius from element centre
+#radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
+surface_points_max_radius = 4
+
+#what is the maximum distance the radius points are allowed to fall from the plane passing through the centre
+#of the element and perpendicular to the element
+#1 before rescaling
+max_distance_from_plane = 0.1165
+
+
+GetVesselRadius.py - run this again with max radius of 5mm large_vessel_radius_v2.csv
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exelem'
+vessel_surface_points_file = home+'/placenta_patient_49/clean_tree/large_vessel_surface_step4.exdata'
+
+vessel_radius_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_v2.csv'
+
+#look for vessel surface points within what maximum radius from element centre
+#radius set to 35 before rescaling; 4 after rescaling for large vessels, 2 for small vessels
+surface_points_max_radius = 5
+
+
+6. WriteRadiusAsEXELEM.py
+
+radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_v2.csv'
+radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_v2'
+
+
+7. placenta_patient_49/visualise_radii.com
+
+display element radii in cmgui
+
+
+figure out how long stems ususally are and remove terminal branches shorter than stems (only from branching points)
+remove short terminal branches - make sure this step does not remove stems (e.g. 1031- length: 0.16, 1144 - 0.33)
+
+
+8. RemoveShortTerminalBranches.py
+
+over 300 short terminal branch elements removed
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_v2.csv'
+elems_to_remove_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step4_removed'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step8'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step8'
+
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step8.csv'
+group_name = 'p49_large_vessels_step8'
+
+
+#terminal branches shorter than the length threshold and with a smaller caliber will be removed
+length_threshold = 1
+radius_threshold = 5
+
+some short branches may stay if they were considered the longest branch out of at least 2 short branches in a branching point (this is so that we don't chop off the ends of long branches where a branching point is towards the end of a branch) - to remove these run RemoveShortTerminalBranches.py again
+
+
+9. RemoveShortTerminalBranches.py  - this needs to be run again to remove all remaining short branches
+
+82 short terminal branch elements removed
+
+
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step8.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step8.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step8.csv'
+elems_to_remove_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step8_removed'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9'
+
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step9.csv'
+group_name = 'p49_large_vessels_step9'
+branch_df_out_file = home+'/placenta_patient_49/clean_tree/step9_branch_df.csv'
+short_thin_branches_df_out_file = home+'/placenta_patient_49/clean_tree/step9_short_thin_branches_df.csv'
+
+#terminal branches shorter than the length threshold and with a smaller caliber will be removed
+length_threshold = 1
+radius_threshold = 5
+
+
+GetBranchingInfo.py
+list branching points with more than 3 branches
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step9.csv'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_multiple_branching_nodes_step9'
+group_name = 'multiple_branching_nodes_step9'
+
+
+10. manually remove loops (can't remove thin elements as this would remove stems as well)
+
+saved edited element file as:
+clean_tree/p49_large_vessels_step9_edited_v3
+(copied file header from file written by Python script, and removed group element lists from the end of the edited file)
+
+RenumberManuallyEditedTrees.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step9.csv'
+node_in_edited_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9_edited_v3.exnode'
+elems_in_edited_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step9_edited_v3.exelem'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step10.csv'
+group_name = 'p49_large_vessels_step10'
+
+
+check new radius file - looks ok in cmgui
+check for orphan nodes and recursive elements (test.py and RemoveRecursiveElements.py) - none
+
+
+
+10b.list disconnected branches
+use output files to check which branches are still disconnected
+
+RemoveDisconnectedBranches.py
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10b'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10b'
+group_name = 'p49_large_vessels_step10b'
+
+#output files with nodes and elements that were removed
+node_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10b_removed'
+elems_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step10b_removed'
+group_name_removed = group_name + '_removed'
+#parameters
+#length_threshold - connected groups of branches under this threshold will be removed
+length_threshold = 500
+
+11. save edited files as step11
+copied file headers from files written by Python script, and removed group element lists from the end of the edited files, added scale factor lines to new elements
+
+element 5083 was last in file p49_large_vessels_step10, remaining elements in step11 added manually
+
+
+11_v2.had to remove more branches near the inlets and some more loops
+saved manual edits (more elements removed from files step11) as /clean_tree/p49_large_vessels_step11_edited
+
+
+created another version of the radius file large_vessel_radius_step11.csv (added new elements from step 11 with 0 radii)
+had to run this again:
+
+RenumberManuallyEditedTrees.py
+
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step11.csv'
+elems_in_edited_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_edited.exelem'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step11_v2.csv'
+group_name = 'p49_large_vessels_step11_v2'
+
+elems_to_remove_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2_removed'
+nodes_to_remove_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2_removed'
+node_candidates_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11_v2_candidates'
+
+
+12.list disconnected branches
+use output files to check which branches are still disconnected
+
+RemoveDisconnectedBranches.py
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step11.exelem'
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12'
+group_name = 'p49_large_vessels_step12'
+
+#output files with nodes and elements that were removed
+node_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12_removed'
+elems_out_file_removed = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step12_removed'
+group_name_removed = group_name + '_removed'
+#parameters
+#length_threshold - connected groups of branches under this threshold will be removed
+length_threshold = 410
+
+
+13.manually connect remaining disconnected branches to the main tree
+add inlets - used existing elements and moved nodes to create longer inlet elements
+
+input file:
+p49_large_vessels_step11_v2
+last element 5065
+
+
+copied file headers from files written by Python script, and removed group element lists from the end of the edited files, added scale factor lines to new elements
+
+saved as 
+p49_large_vessels_step11_v2_edited
+p49_large_vessels_step13
+
+recreated the radii file - set radii of added elements to 0, saved as large_vessel_radius_step13.csv
+
+
+
+14.fix multiple branching points - insert an element inbetween
+
+
+SplitMultipleBranchingPoints.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step13.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step13.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step13.csv'
+
+mult_br_node_out_file = home+'/placenta_patient_49/clean_tree/p49_multiple_branching_nodes_step13'
+mult_br_group_name = 'multiple_branching_nodes_step13'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step14'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step14'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step14.csv'
+group_name = 'p49_large_vessels_step14'
+multiple_branches_file = home+'/placenta_patient_49/clean_tree/p49_step14_multiple_branches.csv'
+
+use_radius = False #if set to False the longest element will be split to accommodate additional branching points
+                   #if set to True the thickest element will be split
+dummy_elem_length_param = 0.1
+
+
+15. FixElementDirection.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step14.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step14.exelem'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step15'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step15'
+group_name = 'p49_large_vessels_step15'
+
+#we need to specify inlet nodes, as finding them is based on correct element direction
+inlet_nodes = [104,1999]
+
+
+16.RenumberElements2.py
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step15.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step15.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step14.csv'
+
+node_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16'
+elems_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16'
+group_name = 'p49_large_vessels_step16'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step16.csv'
+
+
+17. FixRadius.py
+
+
+visualise strahler orders and radii before fixing (visualise_strahler_orders_chor_tree.com)
+
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step16.csv'
+
+radius_group_name = 'p47_chor_radii'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step17.csv'
+radius_out_file_ipfiel = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17.ipfiel'
+radius_out_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17'
+small_radii_elems_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16_small_radii'
+radius_updates_file = home+'/placenta_patient_49/clean_tree/radius_updates_step17.csv'
+branch_info_file = home+'/placenta_patient_49/clean_tree/branch_info_step17.csv'
+
+umbilical_artery_radius = 1.3
+umbilical_artery_elems = [0,2200]
+
+Updated FixRadius.py to update radii smaller than 0.05
+the script updated radius for element 3606 to 0.05, it was 1.42E-14
+
+#input and output file names
+node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
+elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
+vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step16.csv'
+
+radius_group_name = 'p47_chor_radii_v2'
+vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step17_v2.csv'
+radius_out_file_ipfiel = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17_v2.ipfiel'
+radius_out_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17_v2'
+small_radii_elems_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16_small_radii_v2'
+radius_updates_file = home+'/placenta_patient_49/clean_tree/radius_updates_step17_v2.csv'
+branch_info_file = home+'/placenta_patient_49/clean_tree/branch_info_step17_v2.csv'
+
+umbilical_artery_radius = 1.3
+umbilical_artery_elems = [0,2200]
+smallest_radius = 0.05 #any radii smaller than this will be updated to this value
+
+
+
+Had to remove 3 loops - these were missed (loops were removed manually)
+RemoveElems.py
+
+#parameters
+#input and output file names
+node_in_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_step21_v2.exnode'
+elems_in_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_step21.exelem'
+radius_in_file_csv = home + '/placenta_patient_49/clean_tree/large_vessel_radius_step17_v2.csv'
+
+node_out_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_step21_v3.exnode'
+elems_out_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_step21_v3.exelem'
+radius_out_file_csv = home + '/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17_v3.csv'
+radius_out_file_ip = home + '/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17_v3.ipfiel'
+
+elems_to_remove = [3333,3334,3335,3336,4237,4238,4996,4997,4998,4999,5000,5001,5002]
+
+
+
+18.run stats on chorionic vessels
+stored in placenta_patient_49/chorionic_vessel_stats
+
+19. generate vessel seeds in Matlab
+
+
+placenta_volume_cm = 401.7546 cm3
+vascular density for just large vessels = 1.3589 %
+density for all vessels = 3.3687 %
+small vessel density 2.0099 %
+
+
+placental thickness
+Maximum_thickness_value = 2.4349
+mean_placenta_thickness = 1.1423
+thickness_std = 0.3974
+max_placenta_thickness = 1.6203
+min_placenta_thickness = 0.1718
+
+
+20. write point cloud file (exdata) from txt
+WritePointCloud.py
+RescalePointCloud.py
+
+21.transform the nodes so the placenta is in the right position for growing the remaining vessels, where placenta gen expects it (point 0, 0, 0 in the centre of the placenta)
+
+saved as p49_large_vessels_step16 (both exnode and exelem)
+
+transform vessel seed points
+
+
+delete group section from exdata files
+sed '145143,181429d' p49_seed_points_uniform_10_step_7_final.exdata > p49_seed_points_uniform_10_step_7_final2.exdata
+
+
+try growing with heterogeneous distribution first - do the transformation again first
+
+
+22.grow remaining vessels
+stats
+
+check the full trees in cmgui - may need to remove seeds from the chorionic plate area where large vessels are
+
+node file p49_large_vessels_step21_v2
+p49_seed_points_uniform_10_step_7_transformed_v2 - moved y axis by 22 points (+); removed some seed points that didn't belong to the placenta (36284 points in total) p49_seed_points_uniform_10_step_7_final_v2 (generated tree saved
+in growing/uniform/version1_over_70k_elems
+
+generated another uniform distribution with fewer points:
+p49_seed_points_uniform_10_step_9_final (approx 28000 points)
+
+p49_seed_points_heterogeneous_5_10_15_final.exdata (47106 points)
+
+
+het 7_12_18  approx. 27,000 
+het 5_10_17  approx. 34,000
+saved as exdata
+rescaled
+transformed
+
+p49_seed_points_heterogeneous_5_10_17_final.exdata (approx 34,000 points)
+p49_seed_points_heterogeneous_7_12_18_final.exdata (approx 27,000 points)
+
+
+ConvertEXtoIP.py
+
+
+
+adjusted diameter ratio so that terminal vessel diameter is between 0.04-0.08mm
+
+
+
+using Strahler diameter ratio of 1.425. This ratio was chosen based on the desired caliber of the terminal villi described in the literature (0.04 - 0.08 mm) 
+
+
+uniform distribution patient 49 - output_patient_49_uniform_more_points_v2
+
+
+compare arterial volume/venous volume and capillary volume/surface are, volume of vessels not in images between uniform and heterogeneous distributions - these values should be similar; then compare how this impacts resistance/flow 
+make sure that arterial and venous volumes make sense (venous about twice that of arterial?) - check what it was for patient 51
+
+
+placenta_volume_cm = 401.7546 cm3
+vascular density for just large vessels = 1.3589 %
+density for all vessels = 3.3687 %
+small vessel density 2.0099 %
+
+
+arterial vessel volume from images: 13.53 cm3 (does not include vessels smaller than resolution)
+
+
+
+
+choose 2 trees for p 49, uniform & het - try to match the arterial volume
+
+try the ones with over 30k seeds points - better, lower resistance, higher flow, similar vessel volume
+47k points - even bigger flow
+
+
+het 34k and uniform 36k
+
+
+add anastomosis to tree 49 (het 34k)
+compare tree with anastomosis and without
+
+
+
+add two inlets to tree for patient 51:
+
+patient 51 with two inlets, with anastomosis and without (heterogeneous distribution)
+
+AddTwoInlets.py
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_51/clean_tree/full_tree_21/full_tree.exnode'
+elems_in_file = home+'/placenta_patient_51/clean_tree/full_tree_21/full_tree.exelem'
+radii_in_file = home+'/placenta_patient_51/clean_tree/full_tree/chorionic_element_radii_cycle3_v5.csv'
+#number of chorionic elements and nodes so that we can update the radius file
+chor_elems = 1427
+chor_nodes = 1428
+
+
+node_out_file = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/full_tree'
+elems_out_file = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/full_tree'
+radii_out_file_csv = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/chorionic_element_radii_cycle3_v5_two_inlets.csv'
+radii_out_file_ipfiel = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/chorionic_element_radii_cycle3_v5_two_inlets.ipfiel'
+group_name = 'p51_full_tree_two_inlets'
+
+
+#indices of the original inlet element
+inlet_elem = 0
+#indices of elements that will be moved and will become inlets
+new_inlets = [1,827]
+
+#indices of umbilical elements that need to be removed
+elems_to_remove = [0]
+
+
+patient 51 with two inlets, uniform distribution
+AddTwoInlets.py
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_51/clean_tree/full_tree_22/full_tree.exnode'
+elems_in_file = home+'/placenta_patient_51/clean_tree/full_tree_22/full_tree.exelem'
+radii_in_file = home+'/placenta_patient_51/clean_tree/full_tree/chorionic_element_radii_cycle3_v5.csv'
+#number of chorionic elements and nodes so that we can update the radius file
+chor_elems = 1427
+chor_nodes = 1428
+
+
+node_out_file = home+'/placenta_patient_51/clean_tree/full_tree_22_two_inlets/full_tree'
+elems_out_file = home+'/placenta_patient_51/clean_tree/full_tree_22_two_inlets/full_tree'
+radii_out_file_csv = home+'/placenta_patient_51/clean_tree/full_tree_22_two_inlets/chorionic_element_radii_cycle3_v5_two_inlets.csv'
+radii_out_file_ipfiel = home+'/placenta_patient_51/clean_tree/full_tree_22_two_inlets/chorionic_element_radii_cycle3_v5_two_inlets.ipfiel'
+group_name = 'p51_full_tree_22_two_inlets'
+
+
+#indices of the original inlet element
+inlet_elem = 0
+#indices of elements that will be moved and will become inlets
+new_inlets = [1,827]
+
+
+
+InsertAnastomosis.py (patient 51, two inlets)
+
+#parameters
+#input and output file names
+node_in_file = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/full_tree.exnode'
+elems_in_file = home+'/placenta_patient_51/clean_tree/full_tree_21_two_inlets/full_tree.exelem'
+radius_in_file = home + '/test_merged_anast_and_inlets/output_patient_51_two_inlets/arterial_radius_51_two_inlets.exelem'
+
+
+node_out_file = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree'
+node_out_file_ip = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree.ipnode'
+elems_out_file = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree'
+elems_out_file_ip = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree.ipelem'
+group_name = 'p51_full_tree_anast_two_inlets'
+radius_out_file = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree_radius_anast.ipfiel'
+
+
+#indices of elements between which an anastomosis is to be inserted
+first_elem = 1
+second_elem = 827
+anastomosis_radius = 1.8 #mm the same as the umbilical artery
+
+
+InsertAnastomosis.py (patient 49)
+
+#input and output file names
+node_in_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_v3.exnode'
+elems_in_file = home + '/placenta_patient_49/clean_tree/p49_large_vessels_v3.exelem'
+radius_in_file = home + '/placenta_patient_49/clean_tree/p49_large_vessel_radius_v3.csv'
+
+
+node_out_file = home+'/placenta_patient_49/clean_tree/chor_tree_anast/p49_large_vessels_v3_anast'
+#node_out_file_ip = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree.ipnode'
+elems_out_file = home+'/placenta_patient_49/clean_tree/chor_tree_anast/p49_large_vessels_v3_anast'
+#elems_out_file_ip = home+'/placenta_patient_51/clean_tree/full_tree_anast_two_inlets/full_tree.ipelem'
+group_name = 'p49_chor_tree_anast'
+radius_out_file = home+'/placenta_patient_49/clean_tree/chor_tree_anast/p49_large_vessel_radius_v3_anast.ipfiel'
+
+
+#indices of elements between which an anastomosis is to be inserted
+first_elem = 1
+second_elem = 2201
+anastomosis_radius = 1.3 #mm the same as the umbilical artery
+
+
+
+patient 49
+
+
+volume fed by first artery (cm3): 2.59
+volume fed by second artery (cm3): 4.93
+total volume (cm3): 7.53
+volume of umbilical elements (cm3): 0.11
+
+
+
+patient 51
+
+volume fed by first artery (cm3): 4.15
+volume fed by second artery (cm3): 3.31
+total volume (cm3): 7.47
+volume of umbilical elements (cm3): 0.26
+
+
+
+delete lines from a line to end of file
+sed '360272,$d' full_tree.exelem > arterial_tree.exelem
+
+
+next:
+
+update all tree cleanup and stats scripts on github and readme file of how p 49 tree was created
+update run_blood_flow.py script on github, input parameters 
+update reprosim and placentagen when Alys commits the pull requests
+
+
+
+write up the results:
+
+stats for p49 and p51 trees (compare uniform and het distributions) - I changed the way venous radii are assigned so 
+results are now different for p51
+
+
+
+for discussion:
+distribution of seed points doesn't matter,
+matching the volume of vessels?
+
+
+
+may be needed:
+script to remove elements and nodes below a branch - use it to remove some cotyledons from one placenta with and without anast (two inlets) - check what happens to flows - maybe I don't need to do this
+
+
+improvements for the future:
+
+remove loops automatically? or at least list loops (in reprosim elements in a loop had a Strahler order of 0)
+
+get disconnected branches and connect to the nearest terminal node with a similar radius
+
+find centre of the placenta - transform tree and seed points automatically
+
+
+
+

@@ -7,8 +7,8 @@ from os.path import expanduser
 home = expanduser("~")
 
 #parameters
-point_cloud_in_file = home+'/placenta_patient_49/seed_points/p49_seed_points_heterogeneous_7_12_18.exdata'
-point_cloud_out_file = home+'/placenta_patient_49/seed_points/p49_seed_points_heterogeneous_7_12_18_rescaled'
+point_cloud_in_file = home+'/placenta_patient_49/isosurfaces/p49_all_vessels_skeleton_reduced.exdata'
+point_cloud_out_file = home+'/placenta_patient_49/isosurfaces/p49_all_vessels_skeleton_rescaled'
 group_name = 'p49_seed_points_heterogeneous_7_12_18_rescaled'
 
 voxel_size = 0.1165

@@ -134,6 +134,15 @@ def element_centre_xyz(elem,node_loc,elems):
     z = (z1 + z2)/2
     return x,y,z
 
+
+def centre_between_two_nodes_xyz(node1, node2,node_loc):
+    (x1,y1,z1) = node_loc[node1][1:4]
+    (x2, y2, z2) = node_loc[node2][1:4]
+    x = (x1 + x2)/2
+    y = (y1 + y2)/2
+    z = (z1 + z2)/2
+    return x,y,z
+
 #this function returns the coordinates of a node that is a desired distance away from the first node
 #of an element
 #new node coordinates are calculated by scaling a unit vector for the element to the desired distance

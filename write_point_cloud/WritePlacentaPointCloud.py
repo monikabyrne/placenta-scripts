@@ -7,12 +7,15 @@ from os.path import expanduser
 home = expanduser("~")
 
 #parameters
-point_cloud_in_file = home+'/placenta_patient_49/seed_points/p49_seed_points_uniform_every_10_units.txt'
-point_cloud_out_file = home+'/placenta_patient_49/seed_points/p49_seed_points_uniform_10_step_9'
-group_name = 'p49_seed_points_uniform_10_step_9'
+#point_cloud_in_file = home+'/placenta_patient_49/seed_points/p49_seed_points_uniform_every_10_units.txt'
+#point_cloud_out_file = home+'/placenta_patient_49/seed_points/p49_seed_points_uniform_10_step_9'
+#group_name = 'p49_seed_points_uniform_10_step_9'
+point_cloud_in_file = home+'/placenta_patient_49/isosurfaces/p49_all_vessels_skeleton.txt'
+point_cloud_out_file = home+'/placenta_patient_49/isosurfaces/p49_all_vessels_skeleton_reduced'
+group_name = 'p49_all_vessels_skeleton_reduced'
 
 #reduce the number of seed points - keep only every nth point
-step = 9
+step = 4
 
 point_cloud = pd.read_csv(point_cloud_in_file,sep="\t", header=None)
 point_cloud.columns = ['x','y','z']

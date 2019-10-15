@@ -12,11 +12,10 @@ home = expanduser("~")
 #Parameters
 
 #input and output file names
-node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
-elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
-radius_in_file_exelem  = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step17.exelem'
-path = home+'/placenta_patient_49/chorionic_vessel_stats'
-
+node_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/full_tree.exnode'
+elems_in_file = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_tree.exelem'
+radius_in_file_exelem  = home+'/reprosim_patients_49_51/reprosim_results/output_patient_51_two_inlets_uniform/arterial_radius.exelem'
+path = home+'/placenta_patient_49/results/p51_uniform'
 
 full_geom = {}
 full_geom['nodes'] = pg.import_exnode_tree(node_in_file)['nodes'][:, 0:4]

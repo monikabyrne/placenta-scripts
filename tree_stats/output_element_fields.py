@@ -8,21 +8,22 @@ home = expanduser("~")
 
 #parameters
 #input and output file names
-node_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exnode'
-elems_in_file = home+'/placenta_patient_49/clean_tree/p49_large_vessels_step16.exelem'
-vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step16.csv'
+node_in_file = home+'/test_merged_anast_and_inlets/output_bigger/bigger_umb_art.exnode'
+elems_in_file = home+'/test_merged_anast_and_inlets/output_bigger/bigger_umb_art.exelem'
 
-radius_group_name = 'p49_chor_radii'
-vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step16'
-strahler_group_name = 'p49_chor_strahler'
-strahler_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessel_strahler'
-gen_group_name = 'p49_chor_generation'
-gen_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessel_generation'
+#vessel_radius_in_file = home+'/placenta_patient_49/clean_tree/large_vessel_radius_step16.csv'
+
+#radius_group_name = 'p49_chor_radii'
+#vessel_radius_out_file = home+'/placenta_patient_49/clean_tree/p49_large_vessel_radius_step16'
+strahler_group_name = 'bigger_umb_art_strahler'
+strahler_out_file = home+'/test_merged_anast_and_inlets/output_bigger/bigger_strahler'
+gen_group_name = 'bigger_umb_art_generation'
+gen_out_file = home+'/test_merged_anast_and_inlets/output_bigger/bigger_generation'
 
 #read the radius file and write out exelem file with the radius
-radius_file = pd.read_csv(vessel_radius_in_file)
-elem_radius = radius_file.iloc[:]['radius'].tolist()
-export_solution_2(elem_radius, radius_group_name, vessel_radius_out_file, 'radius')
+#radius_file = pd.read_csv(vessel_radius_in_file)
+#elem_radius = radius_file.iloc[:]['radius'].tolist()
+#export_solution_2(elem_radius, radius_group_name, vessel_radius_out_file, 'radius')
 
 
 #output Strahler orders as exelem
